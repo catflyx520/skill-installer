@@ -74,7 +74,7 @@ test('the page and the API need the token', async () => {
 });
 
 test('only known static files are served', async () => {
-  assert.equal((await fetch(`${origin}/app.js`)).status, 200);
+  for (const file of ['app.js', 'i18n.js', 'search.js', 'style.css']) assert.equal((await fetch(`${origin}/${file}`)).status, 200, file);
   assert.equal((await fetch(`${origin}/fonts/Geist-Variable.woff2`)).status, 200);
   assert.equal((await fetch(`${origin}/..%2fpackage.json`)).status, 404);
   assert.equal((await fetch(`${origin}/index.html`)).status, 404, 'the page only comes from / with the token');
@@ -120,10 +120,13 @@ test('state lists, per agent, the skills skill-installer did not install', async
   fs.mkdirSync(mine, { recursive: true });
   fs.writeFileSync(path.join(mine, 'SKILL.md'), '---\nname: hand-made\ndescription: my own\n---\n');
   fs.mkdirSync(at('.claude', 'skills', 'not-a-skill'));
+  // A name skill-installer itself would refuse to install is still a skill the agent has.
+  fs.mkdirSync(at('.claude', 'skills', 'My Skill'));
+  fs.writeFileSync(at('.claude', 'skills', 'My Skill', 'SKILL.md'), '---\nname: My Skill\ndescription: odd\n---\n');
   await post('add', { source: example, agents: ['claude', 'codex'] });
 
   const agents = Object.fromEntries((await state()).agents.map((a) => [a.id, a]));
-  assert.deepEqual(agents.claude.others, [{ name: 'hand-made', description: 'my own' }]);
+  assert.deepEqual(agents.claude.others, [{ name: 'My Skill', description: '' }, { name: 'hand-made', description: 'my own' }]);
   assert.deepEqual(agents.codex.others, [], 'a skill skill-installer installed is not listed twice');
   assert.deepEqual(agents.cursor.others, [], 'a missing skills folder is fine');
 });

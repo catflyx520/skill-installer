@@ -4,10 +4,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { exec } from 'node:child_process';
 import { AGENTS } from './agents.mjs';
+import { SAFE_NAME } from './hub.mjs';
 
-const NAME = /^[A-Za-z0-9][\w.-]*$/;                    // plugin and marketplace names
 const REPO = /^[A-Za-z0-9_][\w.-]*\/[A-Za-z0-9_][\w.-]*$/; // GitHub owner/repo
-export const isName = (s) => typeof s === 'string' && NAME.test(s);
+export const isName = (s) => typeof s === 'string' && SAFE_NAME.test(s);
 export const isRepo = (s) => typeof s === 'string' && REPO.test(s);
 export const isPluginId = (s) => typeof s === 'string' && s.split('@').length <= 2 && s.split('@').every(isName);
 

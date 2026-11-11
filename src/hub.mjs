@@ -23,10 +23,16 @@ export function loadManifest() {
 
 export function saveManifest(m) {
   fs.mkdirSync(hubHome(), { recursive: true });
-  fs.writeFileSync(manifestPath(), JSON.stringify(m, null, 2) + '\n');
+  // Write beside it, then swap: a crash mid-write must not leave half a manifest.
+  fs.writeFileSync(`${manifestPath()}.tmp`, JSON.stringify(m, null, 2) + '\n');
+  fs.renameSync(`${manifestPath()}.tmp`, manifestPath());
 }
 
 // ---------- SKILL.md ----------
+
+// The one rule for skill, plugin and marketplace names. They become folder names and
+// command arguments, so nothing here may look like a path or an option.
+export const SAFE_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 export function readSkillMeta(dir) {
   const text = fs.readFileSync(path.join(dir, 'SKILL.md'), 'utf8').replace(/^﻿/, '');
@@ -44,7 +50,7 @@ export function readSkillMeta(dir) {
     return value.replace(/^["']|["']$/g, '');
   };
   const name = field('name') || path.basename(dir);
-  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name)) {
+  if (!SAFE_NAME.test(name)) {
     throw new Error(`Invalid skill name "${name}" in ${dir} (letters, digits, . _ - only)`);
   }
   return { name, description: field('description'), dir };
@@ -80,23 +86,14 @@ export function fetchSource(source) {
     if (!fs.statSync(root).isDirectory()) throw new Error(`${source} is not a folder`);
     return { root, label: root, repo: null, cleanup: () => {} };
   }
+  // Written like a path, so it was meant as a folder: never go looking for it on GitHub.
+  if (/^(\.|~|[A-Za-z]:|\/)|\\/.test(source)) throw new Error(`Folder not found: ${source}`);
 
-  let url, ref, sub = '', repo = null; // repo: GitHub owner/name, when the source is one
-  const tree = source.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/tree\/([^/]+)\/?(.*)$/);
-  const short = source.match(/^([\w.-]+)\/([\w.-]+)(?:\/(.+))?$/);
-  if (tree) {
-    url = `https://github.com/${tree[1]}/${tree[2]}.git`; ref = tree[3]; sub = tree[4];
-    repo = `${tree[1]}/${tree[2]}`;
-  } else if (/^(https?|ssh|git|file):\/\//.test(source) || source.startsWith('git@')) {
-    url = source;
-    const gh = source.match(/^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/);
-    if (gh) repo = `${gh[1]}/${gh[2]}`;
-  } else if (short) {
-    url = `https://github.com/${short[1]}/${short[2]}.git`; sub = short[3] || '';
-    repo = `${short[1]}/${short[2]}`;
-  } else {
-    throw new Error(`Source not found: ${source} (expected a folder, owner/repo, or a git URL)`);
-  }
+  const parsed = parseSource(source);
+  if (!parsed) throw new Error(`Source not found: ${source} (expected a folder, owner/repo, or a git URL)`);
+  const { url, ref, sub, repo } = parsed;
+  // owner/repo and a mistyped folder look alike, so always say where it goes.
+  console.error(`Fetching ${url}`);
 
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'skill-installer-'));
   const cleanup = () => fs.rmSync(tmp, { recursive: true, force: true });
@@ -113,9 +110,37 @@ export function fetchSource(source) {
     cleanup();
     throw new Error(`Path "${sub}" not found in ${url}`);
   }
-  // Plugins live at the repository root, so a subfolder source has no repo to offer.
-  return { root, label: source, repo: sub ? null : repo, cleanup };
+  return { root, label: source, repo, cleanup };
 }
+
+// What to clone for a remote source: { url, ref, sub, repo }, or null when it is not a remote form.
+// repo is the GitHub owner/name plugins can be installed from. Plugins live at the
+// repository root, so a subfolder source has none.
+export function parseSource(source) {
+  const tree = source.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/tree\/([^/]+)\/?(.*)$/);
+  const short = source.match(/^([\w.-]+)\/([\w.-]+)(?:\/(.+))?$/);
+  let url, ref, sub = '', repo = null;
+  if (tree) {
+    url = `https://github.com/${tree[1]}/${tree[2]}.git`; ref = tree[3]; sub = tree[4];
+    repo = `${tree[1]}/${tree[2]}`;
+  } else if (/^(https?|ssh|git|file):\/\//.test(source) || source.startsWith('git@')) {
+    url = source;
+    const gh = source.match(/^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/);
+    if (gh) repo = `${gh[1]}/${gh[2]}`;
+  } else if (short) {
+    url = `https://github.com/${short[1]}/${short[2]}.git`; sub = short[3] || '';
+    repo = `${short[1]}/${short[2]}`;
+  } else {
+    return null;
+  }
+  return { url, ref, sub, repo: sub ? null : repo };
+}
+
+// Two sources with the same key are the same place: one repository however it is written, or one folder.
+export const sourceKey = (label) => {
+  const remote = parseSource(label);
+  return remote ? remote.url.replace(/(\.git)?\/?$/, '').toLowerCase() : normalize(label);
+};
 
 // ---------- hub copy ----------
 
@@ -123,7 +148,10 @@ const normalize = (p) => {
   const r = path.resolve(p.replace(/^\\\\\?\\/, '')).replace(/[\\/]+$/, '');
   return isWin ? r.toLowerCase() : r;
 };
-export const samePath = (a, b) => normalize(a) === normalize(b);
+const samePath = (a, b) => normalize(a) === normalize(b);
+const real = (p) => { try { return fs.realpathSync(p); } catch { return p; } };
+// True when both paths end up at the same folder, following links.
+export const sameFolder = (a, b) => samePath(real(a), real(b));
 
 const copyDir = (from, to) =>
   fs.cpSync(from, to, {
@@ -133,10 +161,16 @@ const copyDir = (from, to) =>
 
 export function copyIntoHub(skill) {
   const dest = path.join(hubSkillsDir(), skill.name);
-  if (samePath(skill.dir, dest)) return dest;
-  fs.rmSync(dest, { recursive: true, force: true });
+  // The source may be an agent's link to this very copy: then there is nothing to copy.
+  if (sameFolder(skill.dir, dest)) return dest;
   fs.mkdirSync(hubSkillsDir(), { recursive: true });
-  copyDir(skill.dir, dest);
+  // Copy first, swap after, so a failed copy never leaves the hub without the skill.
+  // The dot keeps the temporary folder from ever colliding with a skill name.
+  const fresh = path.join(hubSkillsDir(), `.new-${skill.name}`);
+  fs.rmSync(fresh, { recursive: true, force: true });
+  copyDir(real(skill.dir), fresh);
+  fs.rmSync(dest, { recursive: true, force: true });
+  fs.renameSync(fresh, dest);
   return dest;
 }
 

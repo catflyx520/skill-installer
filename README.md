@@ -78,7 +78,7 @@ skill-installer remove pdf -a codex                  # 只从 Codex 卸载
 skill-installer ui                                   # 打开网页
 ```
 
-再次 `add` 同一个 skill 就是更新。
+再次 `add` 同一个 skill 就是更新，每个工具保持原来的方式（链接或副本）。如果同名的 skill 已经从别的来源装过，会跳过并提示，加 `--force` 才替换。
 
 ### 选项
 
@@ -88,7 +88,7 @@ skill-installer ui                                   # 打开网页
 | `-s <名字>` | 仓库里有多个 skill 时挑一个，可以重复写 |
 | `--all` | 安装来源里的全部 skill |
 | `--copy` | 复制文件而不是链接 |
-| `--force` | 覆盖不是 Skill Installer 创建的同名文件夹 |
+| `--force` | 覆盖不是 Skill Installer 创建的同名文件夹，或者替换从别的来源装的同名 skill |
 | `--no-open` | 和 `ui` 一起用：只打印地址，不打开浏览器 |
 
 ### 来源可以怎么写
@@ -159,7 +159,7 @@ src/hub.mjs               中央仓库、来源获取、链接逻辑
 src/commands.mjs          add / list / remove / agents / inspect
 src/plugins.mjs           插件：调用 claude / codex 自己的插件命令
 src/ui.mjs                网页的本地服务
-ui/                       网页和演示页（同一份），i18n.js 是中英文文案
+ui/                       网页和演示页（同一份）。i18n.js 是中英文文案，search.js 是搜索排序
 skills/                   skill-installer
 test/                     端到端测试
 ```
@@ -170,7 +170,7 @@ test/                     端到端测试
 - 网页和插件功能只在 Windows 上实测过。
 - 命令行的输出是英文。
 - GitHub 页面地址里的分支名不能含 `/`。
-- `--copy` 模式下，更新后副本不会自动刷新，要重新 `add`。
+- `--copy` 模式下，来源变了之后副本不会自动刷新，要重新 `add`。想把副本改回链接，要先 `remove` 再 `add`。
 - 不支持 zip 来源。
 
 ## 许可

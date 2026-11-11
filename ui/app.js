@@ -43,7 +43,6 @@ function h(tag, props = {}, ...kids) {
 
 // ---------- GitHub search (runs in the browser in both modes) ----------
 
-const OFFICIAL = 'anthropics/skills';
 const SKILL_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 // No slash, backslash or colon: a name to search for, not an address or a folder.
 const isSearch = (text) => !/[\\/:]/.test(text);
@@ -69,17 +68,8 @@ async function searchGitHub(name) {
     SKILL_NAME.test(name) ? github(`/repos/${OFFICIAL}/contents/skills/${name}/SKILL.md`).catch(() => null) : null,
   ]);
   if (!byTopic.ok) throw new Error(t('searchFailed', byTopic.status));
-  const rows = async (res) => (res.ok ? (await res.json()).items : []).map((r) => ({
-    repo: r.full_name, description: r.description || '', stars: r.stargazers_count,
-  }));
-  // Of the name matches, keep only repositories named exactly like the search; the rest are unrelated projects.
-  const exact = (await rows(byName)).filter((r) => r.repo.split('/')[1].toLowerCase() === name.toLowerCase());
-  const found = [
-    ...(official?.ok ? [{ repo: OFFICIAL, officialFor: name, official: true }] : []),
-    ...exact,
-    ...(await rows(byTopic)),
-  ];
-  return found.filter((r, i) => found.findIndex((x) => x.repo === r.repo) === i).slice(0, 9);
+  const items = async (res) => (res.ok ? (await res.json()).items : []);
+  return rankRepos(name, await items(byTopic), await items(byName), Boolean(official?.ok)); // search.js
 }
 
 // ---------- backends ----------
@@ -181,7 +171,7 @@ function createDemoBackend() {
           skills.push(skill);
           skills.sort((a, b) => a.name.localeCompare(b.name));
         }
-        for (const id of ids) skill.agents[id] = copy ? 'copy' : 'link';
+        for (const id of ids) skill.agents[id] = copy || skill.agents[id] === 'copy' ? 'copy' : 'link';
       }
       return { code: 0, output: '' };
     },
@@ -336,9 +326,12 @@ async function openSource(source) {
       const q = query.toLowerCase();
       const near = (s) => Boolean(q) && s.name.toLowerCase().includes(q);
       const skills = [...r.skills].sort((a, b) => near(b) - near(a));
-      // Nothing is preselected when the source also offers a plugin: the user picks one kind.
-      const preselect = r.plugins.length ? []
-        : skills.length === 1 ? skills : skills.filter((s) => s.name.toLowerCase() === q);
+      // Tick the skill that was searched for, or the only one there is. Tick nothing when a plugin
+      // has that same name: the same thing comes in two forms, and the user picks one.
+      const wanted = skills.filter((s) => s.name.toLowerCase() === q);
+      const preselect = r.plugins.some((p) => p.name.toLowerCase() === q) ? []
+        : wanted.length ? wanted
+        : skills.length === 1 && r.plugins.length === 0 ? skills : [];
       picker = {
         source,
         repo: r.repo,
@@ -496,16 +489,15 @@ function addTo(skill, agent, okText) {
     okText, t('notDone'));
 }
 
-function update(skill) {
-  const modes = Object.entries(skill.agents).filter(([, mode]) => mode !== '-');
-  install(`update:${skill.name}`, (force) => backend.add({
-    source: skill.source,
-    skills: [skill.name],
-    agents: modes.map(([id]) => id),
-    copy: modes.every(([, mode]) => mode === 'copy'),
-    force,
-  }), t('updated', skill.name), t('updateFailed'));
+// Fetches the skill again from where it came from. Each AI keeps the way it was installed (link or copy).
+function reinstall(skill, agentIds, okText) {
+  install(`update:${skill.name}`,
+    (force) => backend.add({ source: skill.source, skills: [skill.name], agents: agentIds, copy: false, force }),
+    okText, t('updateFailed'));
 }
+
+const update = (skill) => reinstall(skill,
+  Object.keys(skill.agents).filter((id) => skill.agents[id] !== '-'), t('updated', skill.name));
 
 function removePlugin(plugin, agent) {
   pluginsStale = true;
@@ -538,7 +530,8 @@ function installedRow(skill, agent) {
     ] : [
       broken
         ? h('button', { class: 'btn btn-ghost button-sm', type: 'button', disabled: Boolean(busy),
-          onclick: () => addTo(skill, agent, t('repaired', agent.label, skill.name)) }, icon('refresh'), t('repair'))
+          // The hub copy may be the broken part, so a repair starts again from the source.
+          onclick: () => reinstall(skill, [agent.id], t('repaired', agent.label, skill.name)) }, icon('refresh'), t('repair'))
         : h('button', { class: 'btn btn-ghost button-sm', type: 'button', disabled: Boolean(busy), onclick: () => update(skill) },
           icon('refresh'), t(busy === `update:${skill.name}` ? 'updating' : 'update')),
       h('button', { class: 'btn btn-ghost button-sm', type: 'button', disabled: Boolean(busy), onclick: () => { confirming = `skill:${skill.name}`; render(); } },

@@ -22,6 +22,7 @@ const STATIC = {
   '/style.css': 'text/css; charset=utf-8',
   '/app.js': 'text/javascript; charset=utf-8',
   '/i18n.js': 'text/javascript; charset=utf-8',
+  '/search.js': 'text/javascript; charset=utf-8',
   '/fonts/Geist-Variable.woff2': 'font/woff2',
   '/fonts/GeistMono-Variable.woff2': 'font/woff2',
 };
@@ -32,8 +33,6 @@ const HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'Cache-Control': 'no-store',
 };
-const NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
-
 class BadRequest extends Error {}
 
 const runCli = (args) => new Promise((resolve) => {
@@ -57,7 +56,7 @@ const checkSource = (s) => {
   return s.trim();
 };
 const checkNames = (list) => {
-  if (!Array.isArray(list) || !list.every((n) => typeof n === 'string' && NAME.test(n))) throw new BadRequest('Invalid skill name');
+  if (!Array.isArray(list) || !list.every(isName)) throw new BadRequest('Invalid skill name');
   return list;
 };
 const checkAgents = (list) => {
@@ -72,7 +71,10 @@ function unmanaged(id, managed) {
   let names;
   try { names = fs.readdirSync(dir); } catch { return []; }
   return names.filter((name) => !managed.has(name)).sort().flatMap((name) => {
-    try { return [{ name, description: readSkillMeta(path.join(dir, name)).description }]; } catch { return []; } // not a skill
+    if (!fs.existsSync(path.join(dir, name, 'SKILL.md'))) return []; // not a skill
+    let description = '';
+    try { description = readSkillMeta(path.join(dir, name)).description; } catch { /* a name we would not install is still there */ }
+    return [{ name, description }];
   });
 }
 
@@ -118,14 +120,7 @@ const actions = {
   },
   remove({ name, agents = [] }) {
     const [valid] = checkNames([name]);
-    checkAgents(agents);
-    return enqueue(() => {
-      // Taking a skill off the last agent that has it removes it completely,
-      // so no unused copy is left behind in the hub.
-      const found = status().find((s) => s.name === valid);
-      const kept = found ? Object.keys(found.agents).filter((id) => found.agents[id] !== '-' && !agents.includes(id)) : [];
-      return runCli(['remove', valid, ...(kept.length ? flags('-a', agents) : [])]);
-    });
+    return enqueue(() => runCli(['remove', valid, ...flags('-a', checkAgents(agents))]));
   },
 };
 

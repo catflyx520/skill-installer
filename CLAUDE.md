@@ -24,7 +24,11 @@
 - **Codex 装到 `~/.agents/skills/`**，不是 `~/.codex/skills/`。OpenAI 官方文档只列前者；检测 Codex 是否安装仍然看 `~/.codex`（或 `CODEX_HOME`）。
 - **默认目标 = 检测到的工具**（对应的配置目录存在）。`-a all` 强制全部。
 - **来源有多个 skill 时不猜**：列出来，要求 `--skill` 或 `--all`。无交互式提示。
-- **再次 `add` = 更新**，目前没有单独的 `update` 命令。
+- **再次 `add` = 更新**，目前没有单独的 `update` 命令。更新时每个工具保持原来的方式：原来是副本的还是副本，不会悄悄变成链接。
+- **同名但来源不同不算更新**：会跳过并报 `skipped`，加 `--force` 才替换。来源是否相同用 `sourceKey()` 判断，同一个 GitHub 仓库不管写成简写、网址还是带子目录，都算同一个来源。页面的“覆盖已有内容”按钮靠输出里的 `skipped` 这个词触发，改措辞前注意。
+- **复制进 hub 是先复制后替换**（`copyIntoHub`）：来源可能是某个工具文件夹里指向 hub 的链接，先删再复制会把来源自己删掉。这是出过的真实问题，有测试。
+- **写得像路径的来源只当本地文件夹**：以 `.`、`~`、盘符、`/` 开头或带反斜杠的，找不到就报“Folder not found”，不会去 GitHub 找。`owner/repo` 和打错字的相对路径分不开，所以克隆前会打印实际访问的地址。
+- **链接是否正常要看 hub 副本在不在**（`status()`）：副本没了，链接标为 `BROKEN`。页面的“修复”按原始来源重装，不依赖 hub。
 - **零依赖**：只用 Node 内置模块，参数解析手写。除非有充分理由，不要引入依赖。
 - **CLI 输出用英文**（避免 PowerShell 中文乱码），README 和文档用中文。
 - **页面有中英文两套文案**，全部在 `ui/i18n.js` 里，页面右上角切换，选择存在 `localStorage`。`index.html` 里不写任何可见文字，只写 `data-i18n="键"`；`app.js` 里一律用 `t('键')`。加文案时两种语言都要加。服务端和 CLI 返回的英文错误原样显示，不翻译。
@@ -37,7 +41,9 @@
 - **仓库提供哪些插件**由 `pluginsIn()` 读两个清单文件得出：`.claude-plugin/marketplace.json`（Claude Code）和 `.agents/plugins/marketplace.json`（Codex）。一个插件有哪个清单，就能装进哪个工具。
 - **Claude Code 安装插件不带 `-y`**：需要执行“市场声明的命令”的插件会被它拒绝并报错，这是有意保留的保护。
 - **`discoverSkills()` 按名字去重**，隐藏文件夹排在后面。有的仓库会在 `.openclaw/skills` 之类的目录里再放一份同样的 skill。
-- **从最后一个 AI 删除 = 彻底移除**：这条逻辑在 `src/ui.mjs` 的 remove 里，不在页面里，否则 hub 里会留下页面上看不到的副本。命令行的 `remove -a` 行为没变。
+- **从最后一个工具删除 = 彻底移除**：这条逻辑在 `commands.remove` 里，命令行和页面走同一条路，hub 里不会留下没人用的副本。
+- **搜索排序在 `ui/search.js`**，不调用任何浏览器接口，`test/search.test.mjs` 把它当文本读进来测。改排序规则要同时改测试。
+- **名字规则只有一份**：`hub.mjs` 的 `SAFE_NAME`，skill、插件、市场的名字都用它。
 - **一份页面两用**：`ui/index.html` 默认是演示模式；`skill-installer ui` 提供时替换 `data-mode` 和令牌，变成真实模式，介绍内容隐藏。
 - **字体和图标都放在本地**（Geist、Phosphor），页面不依赖外部网络。
 
@@ -73,7 +79,7 @@ examples/fake-tool.mjs   测试里顶替 claude / codex 命令的假工具（不
 
 ## 下一步（按建议顺序）
 
-1. `git init`，发布到 npm，演示页放到 GitHub Pages。
+1. 发布到 npm，演示页放到 GitHub Pages，加 LICENSE 文件。代码在 GitHub 的 `skill-installer` 仓库。
 2. `doctor`：检查断链、缺失的 SKILL.md、清单与磁盘不一致（页面里已能看到“已损坏”）。
 3. `sync`：导出/导入清单，换电脑一键还原。
 4. 项目级安装（`.claude/skills/`、`.agents/skills/` 等）。

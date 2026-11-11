@@ -75,7 +75,7 @@ const STRINGS = {
     donePlugins: (names, agents) => `已把插件 ${names} 装进 ${agents}。`,
     newSession: '在那里新开一个会话就能用了。',
     installFailed: '安装没有全部完成。看下面的输出，修正后再试。',
-    skippedText: '目标位置已有不是 Skill Installer 创建的内容，已跳过，没有改动它。确认不需要了才选择覆盖。',
+    skippedText: '已经有同名的内容，而且不是这次要装的这一个，所以跳过了，没有改动它。具体是什么见下面的输出，确认要替换才选择覆盖。',
     overwrite: '覆盖已有内容', closeNotice: '关闭提示',
 
     chooseAi: '选择 AI', notConnected: '未连接', segLabel: '显示 skill 还是插件',
@@ -185,7 +185,7 @@ const STRINGS = {
     donePlugins: (names, agents) => `Installed plugin ${names} into ${agents}. `,
     newSession: 'Start a new session there to use it.',
     installFailed: 'The install did not fully finish. Read the output below, fix it and try again.',
-    skippedText: 'Something Skill Installer did not create is already there. It was skipped and left unchanged. Overwrite only if you no longer need it.',
+    skippedText: 'Something with the same name is already there and it is not the one you are installing, so it was skipped and left unchanged. The output below says what it is. Overwrite only if you want it replaced.',
     overwrite: 'Overwrite it', closeNotice: 'Close',
 
     chooseAi: 'Choose an AI tool', notConnected: 'Not connected', segLabel: 'Show skills or plugins',

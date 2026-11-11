@@ -3,7 +3,7 @@ import path from 'node:path';
 import { AGENTS, isDetected, resolveAgents } from './agents.mjs';
 import {
   loadManifest, saveManifest, fetchSource, discoverSkills, copyIntoHub,
-  installToAgent, removeFromAgent, destState, hubSkillsDir, samePath,
+  installToAgent, removeFromAgent, destState, hubSkillsDir, sameFolder, sourceKey,
 } from './hub.mjs';
 import { pluginsIn } from './plugins.mjs';
 
@@ -36,14 +36,23 @@ export function add(source, opts) {
     const manifest = loadManifest();
     let failed = 0;
     for (const skill of skills) {
-      const hubDir = copyIntoHub(skill);
       const entry = manifest.skills[skill.name] || { agents: {} };
-      // Adding from the hub copy itself (enabling another agent) must keep the real source.
-      if (!samePath(skill.dir, hubDir) || !entry.source) entry.source = src.label;
-      entry.updatedAt = new Date().toISOString();
+      // Adding from the hub copy itself (enabling another agent) keeps the recorded source.
+      const fromHub = sameFolder(skill.dir, path.join(hubSkillsDir(), skill.name));
       log(`${skill.name}`);
+      // The same name from somewhere else is a different skill, not an update.
+      if (entry.source && !fromHub && !opts.force && sourceKey(entry.source) !== sourceKey(src.label)) {
+        failed++;
+        log(`  x skipped, a skill with this name is already installed from ${entry.source} (use --force to replace it)`);
+        continue;
+      }
+      copyIntoHub(skill);
+      if (!fromHub || !entry.source) entry.source = src.label;
+      entry.updatedAt = new Date().toISOString();
       for (const id of agents) {
-        const r = installToAgent(skill.name, id, { copy: opts.copy, force: opts.force, ours: entry.agents[id]?.mode });
+        // An agent that was given a copy keeps a copy when the skill is updated.
+        const copy = opts.copy || entry.agents[id]?.mode === 'copy';
+        const r = installToAgent(skill.name, id, { copy, force: opts.force, ours: entry.agents[id]?.mode });
         if (r.skipped) {
           failed++;
           log(`  x ${AGENTS[id].label}: skipped, ${r.skipped}\n      ${r.dest}`);
@@ -83,12 +92,14 @@ export function status() {
   return Object.keys(manifest.skills).sort().map((name) => {
     const entry = manifest.skills[name];
     const hubDir = path.join(hubSkillsDir(), name);
+    const hubOk = fs.existsSync(path.join(hubDir, 'SKILL.md'));
     const agents = {};
     for (const id of Object.keys(AGENTS)) {
       const mode = entry.agents[id]?.mode;
       if (!mode) { agents[id] = '-'; continue; }
       const state = destState(path.join(AGENTS[id].skillsDir(), name), hubDir);
-      agents[id] = (mode === 'link' ? state === 'link' : state === 'dir') ? mode : 'BROKEN';
+      // A link is only as good as the hub copy it points at; a copy stands on its own.
+      agents[id] = (mode === 'link' ? hubOk && state === 'link' : state === 'dir') ? mode : 'BROKEN';
     }
     return { name, hubDir, source: entry.source || '', updatedAt: entry.updatedAt, agents };
   });
@@ -125,7 +136,8 @@ export function remove(name, opts) {
     delete entry.agents[id];
   }
 
-  if (everywhere) {
+  // Once the last agent is gone nothing uses the hub copy, so it goes too.
+  if (everywhere || Object.keys(entry.agents).length === 0) {
     fs.rmSync(path.join(hubSkillsDir(), name), { recursive: true, force: true });
     delete manifest.skills[name];
     log(`Removed ${name}`);
