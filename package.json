@@ -1,0 +1,12 @@
+{
+  "name": "ai-skills-installer",
+  "version": "0.1.0",
+  "description": "Install one agent skill into Claude Code, Codex, Cursor and Gemini CLI at once",
+  "keywords": ["agent", "skills", "claude-code", "codex", "cursor", "gemini-cli"],
+  "type": "module",
+  "bin": { "skill-installer": "bin/skill-installer.mjs" },
+  "files": ["bin", "src", "ui", "skills"],
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=18" },
+  "license": "MIT"
+}

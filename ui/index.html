@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN" data-mode="demo">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="skill-installer-token" content="">
+  <title>Skill Installer</title>
+  <meta name="description" content="Install one skill or plugin into Claude Code, Codex, Cursor and Gemini CLI at once. 一次安装，所有 agent 都能用。">
+  <meta property="og:title" content="Skill Installer: install once, use in every agent">
+  <meta property="og:description" content="Install one skill or plugin into Claude Code, Codex, Cursor and Gemini CLI at once.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23D9F26B'/%3E%3Cpath d='M9 16h14M16 9v14' stroke='%23131209' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <!-- Every visible text comes from i18n.js through the data-i18n keys below. -->
+  <script src="i18n.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip button-sm" href="#console" data-i18n="skip"></a>
+
+  <nav class="nav" data-i18n-label="navLabel">
+    <span class="title-3">Skill Installer</span>
+    <span class="chip caption-4" id="mode-chip"></span>
+    <button class="lang button-sm" id="lang-btn" type="button" data-i18n-label="switchLang"></button>
+  </nav>
+
+  <main>
+    <section class="hero marketing">
+      <h1 class="heading-1 gradient"><span data-i18n="hero1"></span><br><span data-i18n="hero2"></span></h1>
+      <p class="body-3 muted hero-sub" data-i18n="heroSub"></p>
+      <a class="btn btn-primary button-md" href="#console" data-i18n="cta"></a>
+      <p class="caption-2 muted"><span data-i18n="heroNote1"></span><br><span data-i18n="heroNote2"></span></p>
+    </section>
+
+    <section class="console" id="console" data-i18n-label="consoleLabel" tabindex="-1">
+      <div class="card">
+        <h2 class="heading-6" data-i18n="installTitle"></h2>
+        <p class="body-6 muted lead" data-i18n="installLead"></p>
+        <form id="add-form" class="add-form" novalidate>
+          <label class="sr-only" for="source" data-i18n="sourceLabel"></label>
+          <input class="input body-6" id="source" autocomplete="off" spellcheck="false">
+          <button class="btn btn-primary button-md" id="find-btn" type="submit"></button>
+        </form>
+        <p class="caption-2 error" id="source-error" hidden></p>
+        <div id="finder"></div>
+      </div>
+
+      <div id="notice" aria-live="polite"></div>
+
+      <div class="card">
+        <h2 class="heading-6" data-i18n="perAiTitle"></h2>
+        <p class="demo-only notice-line body-6" data-i18n="demoNote"></p>
+        <div id="agents"></div>
+      </div>
+    </section>
+
+    <section class="section marketing reveal">
+      <p class="heading-2 tagline" id="tagline"></p>
+    </section>
+
+    <section class="section marketing reveal">
+      <h2 class="heading-4" data-i18n="benefitsTitle"></h2>
+      <ul class="grid-3">
+        <li class="card"><h3 class="title-2" data-i18n="b1t"></h3><p class="body-6 muted" data-i18n="b1d"></p></li>
+        <li class="card"><h3 class="title-2" data-i18n="b2t"></h3><p class="body-6 muted" data-i18n="b2d"></p></li>
+        <li class="card"><h3 class="title-2" data-i18n="b3t"></h3><p class="body-6 muted" data-i18n="b3d"></p></li>
+      </ul>
+    </section>
+
+    <section class="section marketing reveal">
+      <h2 class="heading-4" data-i18n="stepsTitle"></h2>
+      <ol class="grid-3">
+        <li class="card"><p class="caption-3 accent" data-i18n="step1"></p><h3 class="title-2" data-i18n="s1t"></h3><p class="body-6 muted"><span data-i18n="s1a"></span><code class="code">npx ai-skills-installer ui</code><span data-i18n="s1b"></span></p></li>
+        <li class="card"><p class="caption-3 accent" data-i18n="step2"></p><h3 class="title-2" data-i18n="s2t"></h3><p class="body-6 muted" data-i18n="s2d"></p></li>
+        <li class="card"><p class="caption-3 accent" data-i18n="step3"></p><h3 class="title-2" data-i18n="s3t"></h3><p class="body-6 muted" data-i18n="s3d"></p></li>
+      </ol>
+    </section>
+
+    <section class="section marketing reveal">
+      <h2 class="heading-4" data-i18n="faqTitle"></h2>
+      <div class="faq">
+        <details class="card"><summary class="title-3" data-i18n="q1"></summary><p class="body-6 muted" data-i18n="a1"></p></details>
+        <details class="card"><summary class="title-3" data-i18n="q2"></summary><p class="body-6 muted" data-i18n="a2"></p></details>
+        <details class="card"><summary class="title-3" data-i18n="q3"></summary><p class="body-6 muted" data-i18n="a3"></p></details>
+        <details class="card"><summary class="title-3" data-i18n="q4"></summary><p class="body-6 muted" data-i18n="a4"></p></details>
+        <details class="card"><summary class="title-3" data-i18n="q5"></summary><p class="body-6 muted" data-i18n="a5"></p></details>
+        <details class="card"><summary class="title-3" data-i18n="q6"></summary><p class="body-6 muted" data-i18n="a6"></p></details>
+      </div>
+    </section>
+
+    <section class="section final marketing reveal">
+      <h2 class="heading-3" data-i18n="finalTitle"></h2>
+      <a class="btn btn-primary button-md" href="#console" data-i18n="cta"></a>
+    </section>
+  </main>
+
+  <footer class="footer caption-5 muted" data-i18n="footer"></footer>
+</body>
+</html>
