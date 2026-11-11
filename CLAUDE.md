@@ -79,7 +79,7 @@ examples/fake-tool.mjs   测试里顶替 claude / codex 命令的假工具（不
 
 ## 下一步（按建议顺序）
 
-1. 发布到 npm：包已经准备好，但 npm 要求发布者账号开启两步验证，要用户自己开启并运行 `npm publish`。发布后删掉 README “Quick start” 下面那句 “Not on npm yet”。
+1. 已发布到 npm：`ai-skills-installer@0.1.0`，`npx ai-skills-installer ui` 实测可用。再发新版本要先改 `package.json` 的 `version`，然后由用户自己运行 `npm publish`（账号开了两步验证，要输验证码）。新包第一次发布后 npm 会先放一个 `0.0.0-stage` 占位版本，几分钟后才换成真正的版本，这是正常流程。
 2. 演示页放到 GitHub Pages。代码在 GitHub 的 `skill-installer` 仓库。这个仓库的提交邮箱用的是 GitHub 的 noreply 地址（只设在本仓库的 git 配置里），不要改回去。
 2. `doctor`：检查断链、缺失的 SKILL.md、清单与磁盘不一致（页面里已能看到“已损坏”）。
 3. `sync`：导出/导入清单，换电脑一键还原。
