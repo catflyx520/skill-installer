@@ -2,6 +2,8 @@
 
 One command, or one web page, that installs a skill or a plugin into Claude Code, Codex, Cursor and Gemini CLI at once.
 
+**[Try the live demo](https://catflyx520.github.io/skill-installer/)**. It searches GitHub for real and only pretends to install.
+
 - **One copy of every skill.** It lives in `~/.skill-installer/skills/<name>/` and is linked into each tool's skills folder. Update it once and every tool sees the change.
 - **Plugins are installed by the tool itself.** Skill Installer calls the plugin commands of `claude` and `codex` and never touches plugin files.
 - **Your files stay yours.** A folder that Skill Installer did not create is never overwritten or deleted.
@@ -150,7 +152,9 @@ skill-installer add catflyx520/skill-installer --skill skill-installer
 
 ## Live demo
 
-Hosted as static files (GitHub Pages, for example), the `ui/` folder turns into a demo page with an introduction. The GitHub search and the repository contents are real. Installing and deleting happen only in the browser's memory and change no files. A public web page may not write files on your computer, so the version that really installs has to run locally.
+The demo is at https://catflyx520.github.io/skill-installer/ and is redeployed whenever `ui/` changes on `main`.
+
+Hosted as static files, the `ui/` folder turns into a demo page with an introduction. The GitHub search and the repository contents are real. Installing and deleting happen only in the browser's memory and change no files. A public web page may not write files on your computer, so the version that really installs has to run locally.
 
 ## Development
 
