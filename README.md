@@ -9,8 +9,6 @@ One command, or one web page, that installs a skill or a plugin into Claude Code
 
 ## Quick start
 
-> **Not on npm yet.** The `npx` and `npm install` commands below start working once the package is published. Until then, use the source instructions.
-
 ```bash
 npx ai-skills-installer ui
 ```
