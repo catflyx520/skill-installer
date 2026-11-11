@@ -152,7 +152,7 @@ skill-installer add catflyx520/skill-installer --skill skill-installer
 
 ## Live demo
 
-The demo is at https://catflyx520.github.io/skill-installer/ and is redeployed whenever `ui/` changes on `main`.
+The demo is at [catfly.dev/skill-installer/](https://catfly.dev/skill-installer/). The existing [GitHub Pages mirror](https://catflyx520.github.io/skill-installer/) is redeployed whenever `ui/` changes on `main`. The AWS demo is built from a reviewed, pinned commit by the Portfolio publishing workflow; changes here alone do not update that pinned release. This repository has no AWS deployment credentials or permissions.
 
 Hosted as static files, the `ui/` folder turns into a demo page with an introduction. The GitHub search and the repository contents are real. Installing and deleting happen only in the browser's memory and change no files. A public web page may not write files on your computer, so the version that really installs has to run locally.
 
