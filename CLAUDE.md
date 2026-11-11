@@ -30,7 +30,7 @@
 - **写得像路径的来源只当本地文件夹**：以 `.`、`~`、盘符、`/` 开头或带反斜杠的，找不到就报“Folder not found”，不会去 GitHub 找。`owner/repo` 和打错字的相对路径分不开，所以克隆前会打印实际访问的地址。
 - **链接是否正常要看 hub 副本在不在**（`status()`）：副本没了，链接标为 `BROKEN`。页面的“修复”按原始来源重装，不依赖 hub。
 - **零依赖**：只用 Node 内置模块，参数解析手写。除非有充分理由，不要引入依赖。
-- **CLI 输出用英文**（避免 PowerShell 中文乱码），README 和文档用中文。
+- **CLI 输出用英文**（避免 PowerShell 中文乱码）。**README 是英文**，因为它会显示在 GitHub 和 npm 的页面上；这份 CLAUDE.md 用中文。
 - **页面有中英文两套文案**，全部在 `ui/i18n.js` 里，页面右上角切换，选择存在 `localStorage`。`index.html` 里不写任何可见文字，只写 `data-i18n="键"`；`app.js` 里一律用 `t('键')`。加文案时两种语言都要加。服务端和 CLI 返回的英文错误原样显示，不翻译。
 - **页面的所有写操作都 spawn 真实 CLI**（`src/ui.mjs`），不要在服务里重新实现安装逻辑，否则安全规则会被绕开；这样 git 也不会阻塞服务。写操作串行排队，因为都要改清单。
 - **页面的安全边界**：只监听 `127.0.0.1`，页面和 API 都要启动时生成的令牌；传给 CLI 的参数不能以 `-` 开头。skill 的内容不可信，`ui/app.js` 只用文本节点渲染，不要改成 `innerHTML`。
@@ -79,7 +79,8 @@ examples/fake-tool.mjs   测试里顶替 claude / codex 命令的假工具（不
 
 ## 下一步（按建议顺序）
 
-1. 发布到 npm，演示页放到 GitHub Pages，加 LICENSE 文件。代码在 GitHub 的 `skill-installer` 仓库。
+1. 发布到 npm：包已经准备好，但 npm 要求发布者账号开启两步验证，要用户自己开启并运行 `npm publish`。发布后删掉 README “Quick start” 下面那句 “Not on npm yet”。
+2. 演示页放到 GitHub Pages。代码在 GitHub 的 `skill-installer` 仓库。这个仓库的提交邮箱用的是 GitHub 的 noreply 地址（只设在本仓库的 git 配置里），不要改回去。
 2. `doctor`：检查断链、缺失的 SKILL.md、清单与磁盘不一致（页面里已能看到“已损坏”）。
 3. `sync`：导出/导入清单，换电脑一键还原。
 4. 项目级安装（`.claude/skills/`、`.agents/skills/` 等）。

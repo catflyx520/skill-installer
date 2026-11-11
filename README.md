@@ -1,178 +1,187 @@
 # Skill Installer
 
-一条命令，或者一个网页，把一个 skill 或插件同时装进 Claude Code、Codex、Cursor、Gemini CLI。
+One command, or one web page, that installs a skill or a plugin into Claude Code, Codex, Cursor and Gemini CLI at once.
 
-- **skill 只存一份**：放在 `~/.skill-installer/skills/<名字>/`，再链接到各工具的 skills 目录。更新一处，所有工具同时生效。
-- **插件交给工具自己装**：调用 `claude` 和 `codex` 自己的插件命令，不碰插件文件。
-- **不动你的东西**：不是 Skill Installer 创建的文件夹不会被覆盖，也不会被删除。
-- **零依赖**：只需要 Node 18+。从 GitHub 安装时还需要 git。
+- **One copy of every skill.** It lives in `~/.skill-installer/skills/<name>/` and is linked into each tool's skills folder. Update it once and every tool sees the change.
+- **Plugins are installed by the tool itself.** Skill Installer calls the plugin commands of `claude` and `codex` and never touches plugin files.
+- **Your files stay yours.** A folder that Skill Installer did not create is never overwritten or deleted.
+- **No dependencies.** Only Node 18 or later. Installing from GitHub also needs git.
 
-## 开始
+## Quick start
 
-```powershell
-git clone https://github.com/catflyx520/skill-installer.git
-cd skill-installer
+> **Not on npm yet.** The `npx` and `npm install` commands below start working once the package is published. Until then, use the source instructions.
+
+```bash
+npx ai-skills-installer ui
 ```
 
-还没有发布到 npm。发布后可以不下载代码，直接运行 `npx ai-skills-installer ui`。
+That opens the web page. To use the `skill-installer` command everywhere, install it globally:
 
-## 用法一：网页（推荐）
+```bash
+npm install -g ai-skills-installer
+```
 
-### 打开
+The npm package is called `ai-skills-installer`. The command it installs is `skill-installer`.
 
-| 系统 | 做法 |
-|---|---|
-| Windows | 双击 `skill-installer-ui.cmd` |
-| macOS / Linux | `node bin/skill-installer.mjs ui` |
+To work from the source instead:
 
-浏览器会自动打开页面。如果没有打开，把启动窗口里打印的地址复制到浏览器。用的时候保持启动窗口开着，关掉它服务就停了。
-
-### 安装
-
-1. 在顶部输入框里输入名字（比如 `pdf`），点“查找”，页面会去 GitHub 搜索。也可以直接粘贴 GitHub 地址、`owner/repo` 或本地文件夹路径。
-2. 在搜索结果里点“查看里面的内容”。页面把这个仓库里的**插件**和 **skill** 分两组列出来。
-3. 勾选要装的。同一个仓库两种都有时选一种就行，两种都装会重复。
-4. 勾选要装进哪几个已连接的 AI，点“安装”。
-5. 到那个 AI 里新开一个会话，就能用了。
-
-搜索结果按 GitHub 星标数排序，官方仓库 `anthropics/skills` 里有同名 skill 时排第一，其次是名字完全一致的仓库。结果来自所有人公开的仓库，安装前请确认作者可信。
-
-### 查看和删除
-
-页面下半部分每个 AI 一个标签页，里面用开关切换两个列表：
-
-- **Skill**：可以更新（按原来源重新拉取）、删除、把别的 AI 里已有的 skill 加进来。不是 Skill Installer 安装的 skill 也会列出来，但只显示，不能改动。
-- **插件**：你自己装的可以卸载。工具自带或官方目录里的标着“只读”，要到工具里管理。
-
-删除和卸载都要点两次确认。
-
-### 其他
-
-- **中英文切换**：右上角的按钮。选择会记住。
-- **安全**：页面只监听 `127.0.0.1`，每次启动生成新的访问令牌，其他网站操作不了它。
-- **联网**：只有两种情况。搜索时把你输入的名字发给 GitHub，安装时从 GitHub 下载那个仓库。GitHub 搜索不用登录，每次搜索用 2 次额度，限制是每分钟 10 次。
-
-## 用法二：命令行
-
-先让 `skill-installer` 命令在任何地方都能用：
-
-```powershell
+```bash
+git clone https://github.com/catflyx520/skill-installer.git
+cd skill-installer
 npm link
 ```
 
-不想全局安装的话，下面所有命令里的 `skill-installer` 都可以换成 `node bin/skill-installer.mjs`。
+## Usage 1: the web page (recommended)
 
-### 命令
+### Open it
 
-```powershell
-skill-installer agents                               # 看看检测到了哪些工具
-skill-installer inspect anthropics/skills            # 只看来源里有什么，不安装
-skill-installer add .\examples\pony-tails            # 从本地文件夹安装
-skill-installer add anthropics/skills --skill pdf    # 从 GitHub 仓库里挑一个
-skill-installer add anthropics/skills/skills/pdf     # 或者直接指到子目录
-skill-installer add anthropics/skills --all          # 装仓库里的全部 skill
-skill-installer add anthropics/skills -s pdf -a claude,codex   # 只装进指定的工具
-skill-installer list                                 # 每个 skill 装在了哪里
-skill-installer remove pdf                           # 从所有工具卸载
-skill-installer remove pdf -a codex                  # 只从 Codex 卸载
-skill-installer ui                                   # 打开网页
+| How you got it | What to run |
+|---|---|
+| npm | `npx ai-skills-installer ui`, or `skill-installer ui` once installed globally |
+| Source, on Windows | double-click `skill-installer-ui.cmd` |
+| Source, on macOS or Linux | `node bin/skill-installer.mjs ui` |
+
+Your browser opens the page. If it does not, copy the address printed in the launch window into your browser. Keep that window open while you use the page; closing it stops the service.
+
+### Install
+
+1. Type a name in the box at the top, for example `pdf`, and click **Find**. The page searches GitHub. You can also paste a GitHub address, `owner/repo`, or the path of a local folder.
+2. Click **See what is inside** on a result. The page lists the **plugins** and the **skills** of that repository in two groups.
+3. Tick what you want. When a repository offers the same thing both ways, pick one. Installing both gives you duplicates.
+4. Tick the connected AI tools you want it in, then click the install button.
+5. Start a new session in that tool to use it.
+
+Search results are ordered by GitHub stars. The official `anthropics/skills` repository comes first when it has a skill with that name, followed by repositories named exactly like your search. Results come from everyone's public repositories, so check the author before you install.
+
+### View and delete
+
+The lower half of the page has one tab per AI tool. Inside each tab a switch shows one of two lists:
+
+- **Skills**: update (fetch again from the original source), delete, or add a skill that another tool already has. Skills that Skill Installer did not install are listed too, but they are read only.
+- **Plugins**: uninstall the ones you installed. Plugins that ship with the tool or its official catalog are marked read only and are managed inside that tool.
+
+Deleting and uninstalling both ask for a second click.
+
+### Good to know
+
+- **Language**: the button at the top right switches between English and Chinese. Your choice is remembered.
+- **Security**: the page listens on `127.0.0.1` only and uses a new access token every time it starts, so other websites cannot drive it.
+- **Network**: it goes online in two cases. A search sends the name you typed to GitHub, and an install downloads that repository from GitHub. GitHub search needs no login. Each search uses 2 requests out of the 10 per minute GitHub allows.
+
+## Usage 2: the command line
+
+### Commands
+
+```bash
+skill-installer agents                               # which tools were detected
+skill-installer inspect anthropics/skills            # see what a source offers, install nothing
+skill-installer add ./examples/pony-tails            # install from a local folder
+skill-installer add anthropics/skills --skill pdf    # pick one skill from a GitHub repository
+skill-installer add anthropics/skills/skills/pdf     # or point straight at a subfolder
+skill-installer add anthropics/skills --all          # install every skill in the source
+skill-installer add anthropics/skills -s pdf -a claude,codex   # only into the tools you name
+skill-installer list                                 # where each skill is installed
+skill-installer remove pdf                           # remove from every tool
+skill-installer remove pdf -a codex                  # remove from Codex only
+skill-installer ui                                   # open the web page
 ```
 
-再次 `add` 同一个 skill 就是更新，每个工具保持原来的方式（链接或副本）。如果同名的 skill 已经从别的来源装过，会跳过并提示，加 `--force` 才替换。
+Running `add` again for the same skill updates it, and each tool keeps the way it was installed (link or copy). If a skill with that name was already installed from a different source, it is skipped and reported. Add `--force` to replace it.
 
-### 选项
+### Options
 
-| 选项 | 作用 |
+| Option | What it does |
 |---|---|
-| `-a claude,codex` | 指定工具，`-a all` 表示全部。默认装到所有检测到的工具 |
-| `-s <名字>` | 仓库里有多个 skill 时挑一个，可以重复写 |
-| `--all` | 安装来源里的全部 skill |
-| `--copy` | 复制文件而不是链接 |
-| `--force` | 覆盖不是 Skill Installer 创建的同名文件夹，或者替换从别的来源装的同名 skill |
-| `--no-open` | 和 `ui` 一起用：只打印地址，不打开浏览器 |
+| `-a claude,codex` | The tools to target. `-a all` means every tool. The default is every detected tool |
+| `-s <name>` | Pick a skill when the source has several. Can be repeated |
+| `--all` | Install every skill in the source |
+| `--copy` | Copy the files instead of linking |
+| `--force` | Replace a folder Skill Installer did not create, or a skill of the same name from another source |
+| `--no-open` | With `ui`: print the address and do not open a browser |
 
-### 来源可以怎么写
+### Ways to write a source
 
-| 写法 | 例子 |
+| Form | Example |
 |---|---|
-| 本地文件夹 | `.\examples\pony-tails` |
-| GitHub 仓库 | `anthropics/skills` |
-| 仓库里的子目录 | `anthropics/skills/skills/pdf` |
-| GitHub 页面地址 | `https://github.com/anthropics/skills/tree/main/skills/pdf` |
-| git 地址 | `https://github.com/anthropics/skills.git` |
+| Local folder | `./examples/pony-tails` |
+| GitHub repository | `anthropics/skills` |
+| Subfolder of a repository | `anthropics/skills/skills/pdf` |
+| GitHub page address | `https://github.com/anthropics/skills/tree/main/skills/pdf` |
+| git address | `https://github.com/anthropics/skills.git` |
 
-命令行只管 skill。插件的安装和卸载在网页里做，或者直接用工具自己的命令（见下一节）。
+A source that starts with `.`, `~`, `/` or a drive letter is always treated as a local folder and is never looked up on GitHub.
 
-## skill 和插件的区别
+The command line handles skills only. Install and uninstall plugins in the web page, or with each tool's own commands (next section).
 
-skill 是一个带 `SKILL.md` 的文件夹，Skill Installer 自己管：存一份，再链接到各个工具。插件是工具自己的安装包，除了 skill 还可能带命令和钩子，有版本号。Skill Installer **不存放也不改动插件文件**，安装、列出、卸载都是调用那个工具自己的命令：
+## Skills and plugins
 
-| 工具 | 列出 | 安装 | 卸载 |
+A skill is a folder with a `SKILL.md`. Skill Installer manages it: one stored copy, linked into each tool. A plugin is a tool's own package. Besides skills it can bring commands and hooks, and it has a version. Skill Installer **never stores or changes plugin files**. Listing, installing and uninstalling all go through the tool's own commands:
+
+| Tool | List | Install | Uninstall |
 |---|---|---|---|
-| Claude Code | `claude plugin list --json` | `claude plugin install <名字> --marketplace <owner/repo> --json` | `claude plugin uninstall <id> --json` |
-| Codex | `codex plugin list --json` | `codex plugin marketplace add <owner/repo>`，再 `codex plugin add <名字>@<市场> --json` | `codex plugin remove <id> --json` |
+| Claude Code | `claude plugin list --json` | `claude plugin install <name> --marketplace <owner/repo> --json` | `claude plugin uninstall <id> --json` |
+| Codex | `codex plugin list --json` | `codex plugin marketplace add <owner/repo>`, then `codex plugin add <name>@<marketplace> --json` | `codex plugin remove <id> --json` |
 
-所以插件功能需要 `claude` 或 `codex` 命令在 PATH 里。插件只能从 GitHub 仓库的根目录安装。Codex 自带的插件（`openai-` 开头的市场）只显示，不能从页面卸载。Gemini CLI 和 Cursor 的插件目前没有接。
+So plugin features need the `claude` or `codex` command on your PATH. Plugins can only be installed from the root of a GitHub repository. Plugins that come with Codex (marketplaces starting with `openai-`) are shown but cannot be uninstalled from the page. Plugins for Gemini CLI and Cursor are not supported yet.
 
-## 安装位置
+## Where things are installed
 
-| 工具 | 检测依据 | skills 目录 |
+| Tool | Detected by | Skills folder |
 |---|---|---|
 | Claude Code | `~/.claude` | `~/.claude/skills/` |
 | Codex | `~/.codex` | `~/.agents/skills/` |
 | Cursor | `~/.cursor` | `~/.cursor/skills/` |
 | Gemini CLI | `~/.gemini` | `~/.gemini/skills/` |
 
-要支持新工具，在 `src/agents.mjs` 里加一项即可。
+To support another tool, add one entry to `src/agents.mjs`.
 
-## 安全规则
+## Safety rules
 
-- 不会覆盖你手动放进去的同名 skill 文件夹，除非加 `--force` 或在页面里点“覆盖已有内容”。
-- 卸载只删除 Skill Installer 自己创建的链接和副本。
-- Windows 上用 junction 链接，不需要管理员权限。链接失败时自动改为复制。
-- skill 和插件都是交给 AI 执行的指令，可能带脚本。只安装你信得过的作者的内容。
+- A skill folder you added yourself is never overwritten, unless you pass `--force` or click **Overwrite it** in the page.
+- Removing only deletes the links and copies Skill Installer created.
+- On Windows it uses junctions, which need no administrator rights. If a link cannot be made, the files are copied.
+- Skills and plugins are instructions your AI will follow, and they can include scripts. Install only from authors you trust.
 
-## 让 agent 帮你装
+## Let your agent do it
 
-`skills/skill-installer` 是一个 skill。装好后在 agent 里说“帮我装 X”，它会调用本工具的命令行（需要先 `npm link`）：
+`skills/skill-installer` is a skill. Once installed, tell your agent "install X for me" and it runs this command line tool (the `skill-installer` command must be available):
 
-```powershell
-skill-installer add .\skills\skill-installer
+```bash
+skill-installer add catflyx520/skill-installer --skill skill-installer
 ```
 
-## 在线演示
+## Live demo
 
-`ui/` 文件夹直接放到静态托管（比如 GitHub Pages）时，会自动变成带介绍内容的演示页：GitHub 搜索和仓库内容是真的，安装和删除只发生在浏览器内存里，不会改动任何文件。公开网页没有权限写入电脑上的文件，所以真正能用的版本只能在本机打开。
+Hosted as static files (GitHub Pages, for example), the `ui/` folder turns into a demo page with an introduction. The GitHub search and the repository contents are real. Installing and deleting happen only in the browser's memory and change no files. A public web page may not write files on your computer, so the version that really installs has to run locally.
 
-## 开发
+## Development
 
-```powershell
+```bash
 npm test
 ```
 
-测试用临时目录，不会动你的真实配置。
+The tests use temporary folders and never touch your real configuration.
 
 ```
-bin/skill-installer.mjs   命令行入口和参数解析
-src/agents.mjs            工具注册表（路径、检测）
-src/hub.mjs               中央仓库、来源获取、链接逻辑
+bin/skill-installer.mjs   command line entry and argument parsing
+src/agents.mjs            tool registry (paths, detection)
+src/hub.mjs               central store, fetching sources, linking
 src/commands.mjs          add / list / remove / agents / inspect
-src/plugins.mjs           插件：调用 claude / codex 自己的插件命令
-src/ui.mjs                网页的本地服务
-ui/                       网页和演示页（同一份）。i18n.js 是中英文文案，search.js 是搜索排序
-skills/                   skill-installer
-test/                     端到端测试
+src/plugins.mjs           plugins: calls the plugin commands of claude and codex
+src/ui.mjs                local service behind the web page
+ui/                       the web page and the demo (one copy). i18n.js holds the texts, search.js ranks search results
+skills/                   the skill-installer skill
+test/                     end to end tests
 ```
 
-## 已知限制
+## Known limits
 
-- 只支持用户级安装，没有项目级。
-- 网页和插件功能只在 Windows 上实测过。
-- 命令行的输出是英文。
-- GitHub 页面地址里的分支名不能含 `/`。
-- `--copy` 模式下，来源变了之后副本不会自动刷新，要重新 `add`。想把副本改回链接，要先 `remove` 再 `add`。
-- 不支持 zip 来源。
+- Installs are per user. There is no per project install.
+- The web page and the plugin features were only tried on Windows.
+- GitHub page addresses cannot have a `/` in the branch name.
+- With `--copy`, a copy is not refreshed when its source changes. Run `add` again. To turn a copy back into a link, `remove` it and `add` it again.
+- zip sources are not supported.
 
-## 许可
+## License
 
-MIT，见 [LICENSE](LICENSE)。`ui/fonts` 里的字体另有许可，见 [ui/fonts/LICENSE.txt](ui/fonts/LICENSE.txt)。
+MIT, see [LICENSE](LICENSE). The fonts in `ui/fonts` have their own license, see [ui/fonts/LICENSE.txt](ui/fonts/LICENSE.txt).
