@@ -175,4 +175,4 @@ test/                     端到端测试
 
 ## 许可
 
-MIT
+MIT，见 [LICENSE](LICENSE)。`ui/fonts` 里的字体另有许可，见 [ui/fonts/LICENSE.txt](ui/fonts/LICENSE.txt)。
