@@ -1,8 +1,26 @@
-// One page, two backends: the local server when `skill-installer ui` served it,
+// One page, two backends: the user's local server once `skill-installer ui` is running,
 // otherwise an in-memory demo. Skill and GitHub data is untrusted, so
 // everything is rendered as text nodes and never as HTML.
-const token = document.querySelector('meta[name="skill-installer-token"]').content;
+// The local server writes its token into its own copy of the page. The hosted page gets
+// the port and the token from the address the command opens: #connect=<port>.<token>
+const CONNECT = /^#connect=(\d{1,5})\.([0-9a-f]{48})$/;
+const served = document.querySelector('meta[name="skill-installer-token"]').content;
+let connect = location.hash;
+try {
+  if (CONNECT.test(connect)) {
+    sessionStorage.setItem('connect', connect); // a reload stays connected
+    history.replaceState(null, '', location.pathname + location.search); // and the token leaves the address bar
+  } else {
+    connect = sessionStorage.getItem('connect') || '';
+  }
+} catch { /* private mode: connected until the page is reloaded */ }
+const [, port, linked] = served ? [] : connect.match(CONNECT) || [];
+const token = served || linked || '';
+const base = linked ? `http://127.0.0.1:${port}` : ''; // the hosted page calls across to this computer
 const isLocal = Boolean(token);
+if (linked) document.documentElement.dataset.mode = 'local';
+// Pasting the connect address into a tab that already shows this page changes only the #, which loads nothing.
+window.addEventListener('hashchange', () => { if (CONNECT.test(location.hash)) location.reload(); });
 const $ = (id) => document.getElementById(id);
 
 // Phosphor icons, regular weight (MIT).
@@ -77,13 +95,16 @@ async function searchGitHub(name) {
 async function call(method, path, body) {
   let res;
   try {
-    res = await fetch(path, {
+    res = await fetch(base + path, {
       method,
       headers: { 'X-Skill-Installer-Token': token, 'Content-Type': 'application/json' },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new Error(t('netLocal'));
+    const e = new Error(t(base ? 'netHosted' : 'netLocal'));
+    // A browser may stop a public page from reaching this computer. The local copy of the page always can.
+    if (base) e.action = { label: t('openLocal'), safe: true, run: () => { location.href = `${base}/?t=${token}`; } };
+    throw e;
   }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || t('requestFailed', res.status));
@@ -213,7 +234,7 @@ async function refresh() {
     view = await backend.state();
     if (!view.agents.some((a) => a.id === tab && usable(a))) tab = view.agents.find(usable)?.id ?? null;
   } catch (e) {
-    notice = { kind: 'error', text: e.message };
+    notice = { kind: 'error', text: e.message, action: e.action };
   }
   render();
   if (pluginsStale) loadPlugins();
@@ -226,7 +247,7 @@ async function loadPlugins() {
     plugins = await backend.plugins();
   } catch (e) {
     plugins = {};
-    notice = { kind: 'error', text: e.message };
+    notice = { kind: 'error', text: e.message, action: e.action };
   }
   render();
 }
@@ -260,7 +281,7 @@ async function perform(key, job, okText, failText, retry) {
     }
     return false;
   } catch (e) {
-    notice = { kind: 'error', text: e.message };
+    notice = { kind: 'error', text: e.message, action: e.action };
     return false;
   } finally {
     busy = null;
@@ -478,7 +499,7 @@ function renderNotice() {
       h('button', { class: 'icon-btn', type: 'button', 'aria-label': t('closeNotice'), onclick: () => { notice = null; render(); } }, icon('x'))),
     level !== 'ok' && output && h('pre', { class: 'log' }, output),
     action && h('div', { class: 'notice-actions' },
-      h('button', { class: 'btn btn-danger button-sm', type: 'button', disabled: Boolean(busy), onclick: action.run }, action.label))));
+      h('button', { class: `btn ${action.safe ? 'btn-ghost' : 'btn-danger'} button-sm`, type: 'button', disabled: Boolean(busy), onclick: action.run }, action.label))));
 }
 
 // ---------- skills and plugins per AI ----------
@@ -693,6 +714,16 @@ function switchLanguage() {
 $('add-form').addEventListener('submit', find);
 $('source').addEventListener('input', () => showSourceError(''));
 $('lang-btn').addEventListener('click', switchLanguage);
+$('copy-btn').addEventListener('click', async () => {
+  const cmd = $('connect-cmd');
+  try {
+    await navigator.clipboard.writeText(cmd.textContent);
+    $('copy-btn').textContent = t('cmdCopied');
+    setTimeout(() => { $('copy-btn').textContent = t('copyCmd'); }, 2000);
+  } catch {
+    getSelection().selectAllChildren(cmd); // no clipboard access: leave it selected for Ctrl+C
+  }
+});
 if (isLocal) window.addEventListener('focus', () => { if (!busy) refresh(); });
 else startMotion();
 applyLanguage();

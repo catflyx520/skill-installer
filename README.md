@@ -2,7 +2,7 @@
 
 One command, or one web page, that installs a skill or a plugin into Claude Code, Codex, Cursor and Gemini CLI at once.
 
-**[Try the live demo](https://catflyx520.github.io/skill-installer/)**. It searches GitHub for real and only pretends to install.
+**[Open the site](https://catflyx520.github.io/skill-installer/)**. Run one command to connect your computer and it installs for real. Until then it is a demo that searches GitHub for real and only pretends to install.
 
 - **One copy of every skill.** It lives in `~/.skill-installer/skills/<name>/` and is linked into each tool's skills folder. Update it once and every tool sees the change.
 - **Plugins are installed by the tool itself.** Skill Installer calls the plugin commands of `claude` and `codex` and never touches plugin files.
@@ -15,7 +15,7 @@ One command, or one web page, that installs a skill or a plugin into Claude Code
 npx ai-skills-installer ui
 ```
 
-That opens the web page. To use the `skill-installer` command everywhere, install it globally:
+That opens the site in your browser, connected to your computer. To use the `skill-installer` command everywhere, install it globally:
 
 ```bash
 npm install -g ai-skills-installer
@@ -41,7 +41,7 @@ npm link
 | Source, on Windows | double-click `skill-installer-ui.cmd` |
 | Source, on macOS or Linux | `node bin/skill-installer.mjs ui` |
 
-Your browser opens the page. If it does not, copy the address printed in the launch window into your browser. Keep that window open while you use the page; closing it stops the service.
+Your browser opens the hosted site, connected to the service the command started on your computer. If the browser does not open, copy the first address printed in the launch window into it. If the page says it cannot reach your computer, your browser is blocking it: open the second printed address instead, which is the same page served from your own computer. Keep that window open while you use the page; closing it stops the service.
 
 ### Install
 
@@ -154,7 +154,9 @@ skill-installer add catflyx520/skill-installer --skill skill-installer
 
 The demo is at [catfly.dev/skill-installer/](https://catfly.dev/skill-installer/). The existing [GitHub Pages mirror](https://catflyx520.github.io/skill-installer/) is redeployed whenever `ui/` changes on `main`. The AWS demo is built from a reviewed, pinned commit by the Portfolio publishing workflow; changes here alone do not update that pinned release. This repository has no AWS deployment credentials or permissions.
 
-Hosted as static files, the `ui/` folder turns into a demo page with an introduction. The GitHub search and the repository contents are real. Installing and deleting happen only in the browser's memory and change no files. A public web page may not write files on your computer, so the version that really installs has to run locally.
+Hosted as static files, the `ui/` folder is a demo page with an introduction until a computer is connected. The GitHub search and the repository contents are real. Installing and deleting happen only in the browser's memory and change no files.
+
+A public web page may not write files on your computer, so `skill-installer ui` starts a service on `127.0.0.1` and opens the site with `#connect=<port>.<token>` after the address. The page then sends installs and deletes to that service. The service answers only the hosted sites listed in `src/ui.mjs` and its own local page, and every request needs the token. The command opens the GitHub Pages copy, because that one always matches `main`.
 
 ## Development
 
@@ -180,6 +182,7 @@ test/                     end to end tests
 
 - Installs are per user. There is no per project install.
 - The web page and the plugin features were only tried on Windows.
+- The hosted site needs a browser that lets a public page reach `127.0.0.1`. It was tried in Chromium. Chrome may ask once for permission to reach the local network. When a browser blocks it, use the local address the command prints.
 - GitHub page addresses cannot have a `/` in the branch name.
 - With `--copy`, a copy is not refreshed when its source changes. Run `add` again. To turn a copy back into a link, `remove` it and `add` it again.
 - zip sources are not supported.

@@ -1,4 +1,4 @@
-// `skill-installer ui`: a page on 127.0.0.1 for managing skills.
+// `skill-installer ui`: a service on 127.0.0.1 for managing skills, driven by the hosted page or its own copy of it.
 // Every change runs the real CLI in a child process, so the page follows the
 // same safety rules as the command line and git never blocks the server.
 import crypto from 'node:crypto';
@@ -32,6 +32,15 @@ const HEADERS = {
   'Referrer-Policy': 'no-referrer',
   'X-Content-Type-Options': 'nosniff',
   'Cache-Control': 'no-store',
+};
+// The hosted page that `ui` opens. It and its mirrors may call this server; no other website may.
+const SITE = process.env.SKILL_INSTALLER_SITE || 'https://catflyx520.github.io/skill-installer/';
+const SITES = new Set([new URL(SITE).origin, 'https://catflyx520.github.io', 'https://catfly.dev']);
+const PREFLIGHT = {
+  'Access-Control-Allow-Methods': 'GET, POST',
+  'Access-Control-Allow-Headers': 'X-Skill-Installer-Token, Content-Type',
+  'Access-Control-Allow-Private-Network': 'true', // a public page reaching this computer
+  'Access-Control-Max-Age': '600',
 };
 class BadRequest extends Error {}
 
@@ -177,6 +186,16 @@ export function startUi({ open = true } = {}) {
         return send(res, 200, STATIC[url.pathname], fs.readFileSync(path.join(uiDir, url.pathname)));
       }
       if (url.pathname.startsWith('/api/')) {
+        // Browsers name the page a request comes from. Only the hosted page and this server's own page may ask.
+        const from = req.headers.origin;
+        const { port } = server.address();
+        const own = from === `http://127.0.0.1:${port}` || from === `http://localhost:${port}`;
+        if (from && !own && !SITES.has(from)) return json(res, 403, { error: 'Forbidden' });
+        if (SITES.has(from)) {
+          res.setHeader('Access-Control-Allow-Origin', from);
+          res.setHeader('Vary', 'Origin');
+          if (req.method === 'OPTIONS') return res.writeHead(204, PREFLIGHT).end(); // asked before the token can be sent
+        }
         if (req.headers['x-skill-installer-token'] !== token) return json(res, 403, { error: 'Forbidden' });
         const name = url.pathname.slice(5);
         if (req.method === 'GET' && name === 'state') return json(res, 200, state());
@@ -193,8 +212,11 @@ export function startUi({ open = true } = {}) {
 
   server.on('error', (e) => { console.error(`Error: ${e.message}`); process.exitCode = 1; });
   server.listen(0, '127.0.0.1', () => {
-    const address = `http://127.0.0.1:${server.address().port}/?t=${token}`;
-    console.log(`skill-installer is running at ${address}`);
+    const { port } = server.address();
+    // After the #, so the token is never sent to the site's server.
+    const address = `${SITE}#connect=${port}.${token}`;
+    console.log(`skill-installer is running. Open ${address}`);
+    console.log(`If that page cannot connect, open http://127.0.0.1:${port}/?t=${token} instead.`);
     console.log('Keep this window open while you use the page. Press Ctrl+C to stop.');
     if (open) openBrowser(address);
   });

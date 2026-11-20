@@ -14,7 +14,7 @@ const example = path.join(root, 'examples', 'pony-tails');
 // Plugins are handled by the real claude and codex CLIs; tests swap in a fake that records its calls.
 const fakeTool = (name) => `"${process.execPath}" "${path.join(root, 'examples', 'fake-tool.mjs')}" ${name}`;
 
-let home, server, address, origin, token;
+let home, server, address, origin, token, output;
 const at = (...p) => path.join(home, ...p);
 const toolCalls = () => (fs.existsSync(at('calls.log')) ? fs.readFileSync(at('calls.log'), 'utf8').trim().split('\n') : []);
 
@@ -33,7 +33,7 @@ beforeEach(async () => {
     server.stdout.on('data', (d) => {
       out += d;
       const m = out.match(/http:\/\/\S+/);
-      if (m) resolve(m[0]);
+      if (m) { output = out; resolve(m[0]); }
     });
     server.once('exit', () => reject(new Error(`server exited: ${out}`)));
   });
@@ -71,6 +71,34 @@ test('the page and the API need the token', async () => {
   const html = await page.text();
   assert.match(html, /data-mode="local"/);
   assert.ok(html.includes(token));
+});
+
+test('the hosted site may call the API, other sites may not', async () => {
+  const site = 'https://catflyx520.github.io';
+  const preflight = await fetch(`${origin}/api/add`, { method: 'OPTIONS', headers: { Origin: site } });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get('access-control-allow-origin'), site);
+  assert.equal(preflight.headers.get('access-control-allow-private-network'), 'true');
+  assert.match(preflight.headers.get('access-control-allow-headers'), /x-skill-installer-token/i);
+
+  const allowed = await fetch(`${origin}/api/state`, { headers: { ...headers(), Origin: site } });
+  assert.equal(allowed.status, 200);
+  assert.equal(allowed.headers.get('access-control-allow-origin'), site);
+
+  // Even with the right token: the token is only ever handed to the hosted page.
+  for (const other of ['https://evil.example', 'null']) {
+    const refused = await fetch(`${origin}/api/add`, {
+      method: 'POST', headers: { ...headers(), Origin: other }, body: JSON.stringify({ source: example }),
+    });
+    assert.equal(refused.status, 403, other);
+    assert.equal(refused.headers.get('access-control-allow-origin'), null, other);
+    assert.equal((await fetch(`${origin}/api/add`, { method: 'OPTIONS', headers: { Origin: other } })).status, 403, other);
+  }
+  assert.ok(!fs.existsSync(at('.skill-installer')));
+});
+
+test('the command opens the hosted site with the connection details', () => {
+  assert.ok(output.includes(`https://catflyx520.github.io/skill-installer/#connect=${new URL(address).port}.${token}`), output);
 });
 
 test('only known static files are served', async () => {

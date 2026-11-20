@@ -10,7 +10,7 @@ Usage:
   skill-installer remove <name>     Remove a skill everywhere (or only from -a agents)
   skill-installer agents            Show supported agents and whether they are detected
   skill-installer inspect <source>  Print the skills in a source as JSON, without installing
-  skill-installer ui                Open the local web page to manage skills
+  skill-installer ui                Open the web page to manage skills and plugins
 
 Options:
   -a, --agent <ids>   Agents to target: claude, codex, cursor, gemini, all
