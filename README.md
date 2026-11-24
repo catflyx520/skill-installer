@@ -2,7 +2,7 @@
 
 One command, or one web page, that installs a skill or a plugin into Claude Code, Codex, Cursor and Gemini CLI at once.
 
-**[Open the site](https://catfly.dev/skill-installer/)**. Run one command to connect your computer and it installs for real. Until then it is a demo that searches GitHub for real and only pretends to install.
+**[Open the site](https://catfly.dev/skill-installer/)**. Run one command to connect your computer and it installs for real. Until then it is a preview: the search is real, and installing or deleting changes nothing.
 
 - **One copy of every skill.** It lives in `~/.skill-installer/skills/<name>/` and is linked into each tool's skills folder. Update it once and every tool sees the change.
 - **Plugins are installed by the tool itself.** Skill Installer calls the plugin commands of `claude` and `codex` and never touches plugin files.
@@ -150,11 +150,11 @@ To support another tool, add one entry to `src/agents.mjs`.
 skill-installer add catflyx520/skill-installer --skill skill-installer
 ```
 
-## Live demo
+## The hosted site
 
 The site is at [catfly.dev/skill-installer/](https://catfly.dev/skill-installer/), and that is the address `skill-installer ui` opens. The [GitHub Pages mirror](https://catflyx520.github.io/skill-installer/) is redeployed whenever `ui/` changes on `main`. The catfly.dev copy is built from a reviewed, pinned commit by the Portfolio publishing workflow; changes here alone do not update that pinned release. This repository has no AWS deployment credentials or permissions.
 
-Hosted as static files, the `ui/` folder is a demo page with an introduction until a computer is connected. The GitHub search and the repository contents are real. Installing and deleting happen only in the browser's memory and change no files.
+Hosted as static files, the `ui/` folder is a preview with an introduction and a usage guide until a computer is connected. The GitHub search and the repository contents are real. Installing and deleting happen only in the browser's memory and change no files.
 
 A public web page may not write files on your computer, so `skill-installer ui` starts a service on `127.0.0.1` and opens the site with `#connect=<port>.<token>` after the address. The page then sends installs and deletes to that service. The service answers only the hosted sites listed in `src/ui.mjs` and its own local page, and every request needs the token. Both copies are on that list. Because the catfly.dev copy is pinned, a change to the page reaches the people who run the command only after the Portfolio release is updated.
 

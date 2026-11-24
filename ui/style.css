@@ -79,6 +79,14 @@ main { width: 100%; max-width: 960px; margin: 0 auto; padding: var(--s900) var(-
 .final { display: flex; flex-direction: column; align-items: center; gap: var(--s300); text-align: center; }
 .footer { padding: var(--s300) var(--s200) var(--s500); text-align: center; }
 [data-mode="local"] .marketing, [data-mode="local"] .footer, [data-mode="local"] .demo-only { display: none; }
+/* Numbered steps of the connect card */
+.steps { display: flex; flex-direction: column; gap: var(--s100); margin-top: var(--s200); counter-reset: step; }
+.steps > li { position: relative; min-height: var(--s300); padding: var(--s25) 0 0 var(--s400); counter-increment: step; }
+.steps > li::before { content: counter(step); position: absolute; top: 0; left: 0; display: flex; align-items: center; justify-content: center; width: var(--s300); height: var(--s300); border-radius: 9999px; background: var(--hover); color: var(--accent); font-size: 12px; line-height: 16px; font-weight: 600; }
+.steps .add-form { margin-top: var(--s75); }
+.steps-note { margin-top: var(--s200); }
+/* The guide has no scroll motion once connected: that script only runs on the public page. */
+[data-mode="local"] .reveal { opacity: 1; transform: none; }
 .notice-line { margin-top: var(--s100); padding: var(--s75) var(--s100); border: 1px solid var(--accent); border-radius: 8px; color: var(--accent); }
 
 /* Controls */

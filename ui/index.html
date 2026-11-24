@@ -37,11 +37,19 @@
       <div class="card demo-only">
         <h2 class="heading-6" data-i18n="connectTitle"></h2>
         <p class="body-6 muted lead" data-i18n="connectLead"></p>
-        <div class="add-form">
-          <code class="input code body-6" id="connect-cmd">npx ai-skills-installer ui</code>
-          <button class="btn btn-primary button-md" id="copy-btn" type="button" data-i18n="copyCmd"></button>
-        </div>
-        <p class="caption-2 muted lead" data-i18n="connectNote"></p>
+        <ol class="steps body-6">
+          <li data-i18n="c1"></li>
+          <li>
+            <span data-i18n="c2"></span>
+            <div class="add-form">
+              <code class="input code body-6" id="connect-cmd">npx ai-skills-installer ui</code>
+              <button class="btn btn-primary button-md" id="copy-btn" type="button" data-i18n="copyCmd"></button>
+            </div>
+          </li>
+          <li data-i18n="c3"></li>
+          <li data-i18n="c4"></li>
+        </ol>
+        <p class="caption-2 muted steps-note" data-i18n="connectNote"></p>
       </div>
 
       <div class="card">
@@ -78,12 +86,16 @@
       </ul>
     </section>
 
-    <section class="section marketing reveal">
+    <!-- Not marketing: the guide stays visible once a computer is connected. -->
+    <section class="section reveal">
       <h2 class="heading-4" data-i18n="stepsTitle"></h2>
       <ol class="grid-3">
         <li class="card"><p class="caption-3 accent" data-i18n="step1"></p><h3 class="title-2" data-i18n="s1t"></h3><p class="body-6 muted"><span data-i18n="s1a"></span><code class="code">npx ai-skills-installer ui</code><span data-i18n="s1b"></span></p></li>
         <li class="card"><p class="caption-3 accent" data-i18n="step2"></p><h3 class="title-2" data-i18n="s2t"></h3><p class="body-6 muted" data-i18n="s2d"></p></li>
         <li class="card"><p class="caption-3 accent" data-i18n="step3"></p><h3 class="title-2" data-i18n="s3t"></h3><p class="body-6 muted" data-i18n="s3d"></p></li>
+        <li class="card"><p class="caption-3 accent" data-i18n="step4"></p><h3 class="title-2" data-i18n="s4t"></h3><p class="body-6 muted" data-i18n="s4d"></p></li>
+        <li class="card"><p class="caption-3 accent" data-i18n="step5"></p><h3 class="title-2" data-i18n="s5t"></h3><p class="body-6 muted" data-i18n="s5d"></p></li>
+        <li class="card"><p class="caption-3 accent" data-i18n="step6"></p><h3 class="title-2" data-i18n="s6t"></h3><p class="body-6 muted" data-i18n="s6d"></p></li>
       </ol>
     </section>
 
@@ -96,6 +108,9 @@
         <details class="card"><summary class="title-3" data-i18n="q4"></summary><p class="body-6 muted" data-i18n="a4"></p></details>
         <details class="card"><summary class="title-3" data-i18n="q5"></summary><p class="body-6 muted" data-i18n="a5"></p></details>
         <details class="card"><summary class="title-3" data-i18n="q6"></summary><p class="body-6 muted" data-i18n="a6"></p></details>
+        <details class="card"><summary class="title-3" data-i18n="q7"></summary><p class="body-6 muted" data-i18n="a7"></p></details>
+        <details class="card"><summary class="title-3" data-i18n="q8"></summary><p class="body-6 muted" data-i18n="a8"></p></details>
+        <details class="card"><summary class="title-3" data-i18n="q9"></summary><p class="body-6 muted" data-i18n="a9"></p></details>
       </div>
     </section>
 

@@ -48,6 +48,7 @@
 - **搜索排序在 `ui/search.js`**，不调用任何浏览器接口，`test/search.test.mjs` 把它当文本读进来测。改排序规则要同时改测试。
 - **名字规则只有一份**：`hub.mjs` 的 `SAFE_NAME`，skill、插件、市场的名字都用它。
 - **一份页面三种用法**：`ui/index.html` 默认是演示模式；地址里带 `#connect` 时由 `app.js` 切成真实模式；本地服务自己提供页面时替换 `data-mode` 和令牌，也是真实模式。真实模式下介绍内容隐藏。
+- **页面文案不再叫“演示”**（用户的决定，因为连接后就是能直接用的版本）：没连接的状态叫“未连接”或“预览”，这时成功提示后面会加一句“这只是预览，没有改动你的电脑”（`previewOnly`），不要去掉，否则访客会以为真的装上了。内部名字没有改：`data-mode="demo"`、`demo-only`、`createDemoBackend` 都还在，CSS、本地服务和 Portfolio 的打包脚本依赖它们。“怎么用”那一节连接后也显示，所以它没有 `marketing` 这个 class。
 - **字体和图标都放在本地**（Geist、Phosphor），页面不依赖外部网络。
 
 ## 代码结构
@@ -82,7 +83,7 @@ examples/fake-tool.mjs   测试里顶替 claude / codex 命令的假工具（不
 
 ## 下一步（按建议顺序）
 
-1. `package.json` 是 `0.2.1`（默认网站换成 catfly.dev），还没有发布；catfly.dev 上已经是能连接的页面（Portfolio 固定在 `6dbe056`），所以随时可以发。已发布到 npm：`ai-skills-installer@0.2.0`（2026-11-24，托管网站直连，默认打开 GitHub Pages）。用发布的包实测过：`npx ai-skills-installer@latest ui` 启动后，线上网站在 Chrome 157 和 Edge 157 里能连上本机（无界面模式，用调试接口授予本地网络权限）。没测到的：Chrome 的权限弹窗本身、Safari、Firefox。Claude 桌面应用的内置浏览器会拦住这种连接，页面会显示“打开本地页面”的后备按钮。发布后 npm 要过几分钟才显示新版本（这次约 6 分钟）。再发新版本要先改 `package.json` 的 `version`，然后由用户自己运行 `npm publish`（账号开了两步验证，要输验证码）。新包第一次发布后 npm 会先放一个 `0.0.0-stage` 占位版本，几分钟后才换成真正的版本，这是正常流程。
+1. 已发布到 npm：`ai-skills-installer@0.2.1`（2026-11-24，默认打开 catfly.dev）。用发布的包实测过：命令打印的是 catfly.dev 的连接地址，Chrome 157 里打开后能连上本机。catfly.dev 上的页面固定在 Portfolio 的 `6dbe056`。`0.2.0` 是同一天早些时候发的，功能相同，默认打开 GitHub Pages。用发布的包实测过：`npx ai-skills-installer@latest ui` 启动后，线上网站在 Chrome 157 和 Edge 157 里能连上本机（无界面模式，用调试接口授予本地网络权限）。没测到的：Chrome 的权限弹窗本身、Safari、Firefox。Claude 桌面应用的内置浏览器会拦住这种连接，页面会显示“打开本地页面”的后备按钮。发布后 npm 要过几分钟才显示新版本（这次约 6 分钟）。再发新版本要先改 `package.json` 的 `version`，然后由用户自己运行 `npm publish`（账号开了两步验证，要输验证码）。新包第一次发布后 npm 会先放一个 `0.0.0-stage` 占位版本，几分钟后才换成真正的版本，这是正常流程。
 2. 演示页在 https://catflyx520.github.io/skill-installer/ ，由 `.github/workflows/pages.yml` 在 `ui/` 有改动并推到 `main` 时自动重新部署。代码在 GitHub 的 `skill-installer` 仓库。这个仓库的提交邮箱用的是 GitHub 的 noreply 地址（只设在本仓库的 git 配置里），不要改回去。
 2. `doctor`：检查断链、缺失的 SKILL.md、清单与磁盘不一致（页面里已能看到“已损坏”）。
 3. `sync`：导出/导入清单，换电脑一键还原。

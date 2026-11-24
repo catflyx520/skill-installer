@@ -271,7 +271,8 @@ async function perform(key, job, okText, failText, retry) {
   try {
     const r = await job();
     if (r.code === 0) {
-      notice = { kind: 'ok', text: okText, output: r.output };
+      // Without a connection nothing was changed on any computer, and the message must say so.
+      notice = { kind: 'ok', text: okText + (isLocal ? '' : t('previewOnly')), output: r.output };
       return true;
     }
     if (retry && /skipped/.test(r.output)) {
@@ -411,7 +412,7 @@ function submitInstall() {
       pluginsStale = true;
     }
     return { code: runs.find((r) => r.code !== 0)?.code ?? 0, output: runs.map((r) => r.output).filter(Boolean).join('\n') };
-  }, done + t('newSession'), t('installFailed'), () => {
+  }, done + (isLocal ? t('newSession') : ''), t('installFailed'), () => {
     picker = null;
     results = null;
     $('source').value = '';
