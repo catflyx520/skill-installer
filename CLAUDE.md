@@ -82,7 +82,7 @@ examples/fake-tool.mjs   测试里顶替 claude / codex 命令的假工具（不
 
 ## 下一步（按建议顺序）
 
-1. 已发布到 npm：`ai-skills-installer@0.1.0`，`npx ai-skills-installer ui` 实测可用。`package.json` 已改成 `0.2.0`（托管网站直连），还没有发布：先把页面推到 `main`，等 GitHub Pages 部署完，再发 npm。从真正的 https 网站连接本机还没有实测过，只在本地用另一个来源的 http 页面测过；发布前要在 Chrome 里走一遍，Safari 和 Firefox 也看一下。再发新版本要先改 `package.json` 的 `version`，然后由用户自己运行 `npm publish`（账号开了两步验证，要输验证码）。新包第一次发布后 npm 会先放一个 `0.0.0-stage` 占位版本，几分钟后才换成真正的版本，这是正常流程。
+1. 已发布到 npm：`ai-skills-installer@0.2.0`（2026-11-24，托管网站直连）。用发布的包实测过：`npx ai-skills-installer@latest ui` 启动后，线上网站在 Chrome 157 和 Edge 157 里能连上本机（无界面模式，用调试接口授予本地网络权限）。没测到的：Chrome 的权限弹窗本身、Safari、Firefox。Claude 桌面应用的内置浏览器会拦住这种连接，页面会显示“打开本地页面”的后备按钮。发布后 npm 要过几分钟才显示新版本（这次约 6 分钟）。再发新版本要先改 `package.json` 的 `version`，然后由用户自己运行 `npm publish`（账号开了两步验证，要输验证码）。新包第一次发布后 npm 会先放一个 `0.0.0-stage` 占位版本，几分钟后才换成真正的版本，这是正常流程。
 2. 演示页在 https://catflyx520.github.io/skill-installer/ ，由 `.github/workflows/pages.yml` 在 `ui/` 有改动并推到 `main` 时自动重新部署。代码在 GitHub 的 `skill-installer` 仓库。这个仓库的提交邮箱用的是 GitHub 的 noreply 地址（只设在本仓库的 git 配置里），不要改回去。
 2. `doctor`：检查断链、缺失的 SKILL.md、清单与磁盘不一致（页面里已能看到“已损坏”）。
 3. `sync`：导出/导入清单，换电脑一键还原。
