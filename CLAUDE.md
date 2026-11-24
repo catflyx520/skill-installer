@@ -49,6 +49,7 @@
 - **名字规则只有一份**：`hub.mjs` 的 `SAFE_NAME`，skill、插件、市场的名字都用它。
 - **一份页面三种用法**：`ui/index.html` 默认是演示模式；地址里带 `#connect` 时由 `app.js` 切成真实模式；本地服务自己提供页面时替换 `data-mode` 和令牌，也是真实模式。真实模式下介绍内容隐藏。
 - **页面文案不再叫“演示”**（用户的决定，因为连接后就是能直接用的版本）：没连接的状态叫“未连接”或“预览”，这时成功提示后面会加一句“这只是预览，没有改动你的电脑”（`previewOnly`），不要去掉，否则访客会以为真的装上了。内部名字没有改：`data-mode="demo"`、`demo-only`、`createDemoBackend` 都还在，CSS、本地服务和 Portfolio 的打包脚本依赖它们。“怎么用”那一节连接后也显示，所以它没有 `marketing` 这个 class。
+- **`index.html` 里不要写指向外站的 `href`**：Portfolio 的线上验证脚本（`scripts/verify-skill-installer.mjs`）会读 HTML 里所有的 `src` 和 `href`，不在本站的就算失败。指向 GitHub 仓库的链接写成 `data-repo="<可选的 # 锚点>"`，地址由 `app.js` 里的 `REPO` 常量在启动时填上。
 - **字体和图标都放在本地**（Geist、Phosphor），页面不依赖外部网络。
 
 ## 代码结构

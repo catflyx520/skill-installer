@@ -63,6 +63,7 @@ p { text-wrap: pretty; }
 .lang { padding: var(--s25) var(--s75); border: 1px solid var(--line); border-radius: 9999px; background: transparent; color: var(--text); font-family: inherit; cursor: pointer; transition: background-color 300ms var(--curve), transform 300ms var(--curve); }
 .lang:hover { background: var(--hover); }
 .lang:active { transform: scale(0.98); }
+.nav-link { display: inline-flex; align-items: center; gap: var(--s50); text-decoration: none; }
 main { width: 100%; max-width: 960px; margin: 0 auto; padding: var(--s900) var(--s200) var(--s700); }
 .hero { display: flex; flex-direction: column; align-items: center; gap: var(--s300); padding: var(--s800) 0 var(--s700); text-align: center; }
 .hero h1, .hero-sub { max-width: 680px; }
@@ -77,6 +78,7 @@ main { width: 100%; max-width: 960px; margin: 0 auto; padding: var(--s900) var(-
 .faq summary { cursor: pointer; }
 .faq p { margin-top: var(--s75); }
 .final { display: flex; flex-direction: column; align-items: center; gap: var(--s300); text-align: center; }
+.final-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s100); }
 .footer { padding: var(--s300) var(--s200) var(--s500); text-align: center; }
 [data-mode="local"] .marketing, [data-mode="local"] .footer, [data-mode="local"] .demo-only { display: none; }
 /* Numbered steps of the connect card */
@@ -178,6 +180,7 @@ main { width: 100%; max-width: 960px; margin: 0 auto; padding: var(--s900) var(-
   .heading-3 { font-size: 30px; line-height: 36px; }
   .heading-4 { font-size: 24px; line-height: 32px; }
   .hero { padding-top: var(--s600); }
+  .gh-text { display: none; } /* the icon alone keeps the bar inside a phone screen */
   .grid-3 { grid-template-columns: 1fr; }
   .add-form { flex-direction: column; }
   .row { flex-direction: column; }

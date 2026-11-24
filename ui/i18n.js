@@ -25,6 +25,7 @@ const STRINGS = {
     c3: '浏览器会重新打开这个网站。如果它问是否允许访问本地网络，点“允许”。',
     c4: '页面顶部显示“已连接本机”后，就可以开始安装了。',
     copyCmd: '复制命令', cmdCopied: '已复制',
+    ghLabel: '在 GitHub 上查看源码', ghHint: '更喜欢命令行，或者想先看源码？', ghHintLink: '到 GitHub 看安装和用法说明',
     connectNote: '需要 Node.js 18 或更高版本。在终端输入 node -v 可以看到版本号，没有的话先到 nodejs.org 安装。使用期间终端窗口要一直开着，关掉就断开。',
 
     benefitsTitle: '不用再一个目录一个目录地复制',
@@ -51,7 +52,7 @@ const STRINGS = {
     q8: '没有 Node.js 怎么办', a8: '到 nodejs.org 下载 LTS 版本并安装。装好后重新打开一个终端，再运行命令。',
     q9: '怎么用上最新版本', a9: '运行 npx ai-skills-installer@latest ui，它总是会拿到最新发布的版本。',
     finalTitle: '连接你的电脑，装上第一个 skill',
-    footer: 'MIT 许可。Skill Installer 不收集任何数据。',
+    footer: 'MIT 许可。Skill Installer 不收集任何数据。', footerSource: ' 源码：',
 
     netGithub: '连不上 GitHub。检查网络，或者直接粘贴仓库地址。',
     rateLimit: 'GitHub 的查询次数暂时用完了。等一分钟再试，或者直接粘贴仓库地址。',
@@ -152,6 +153,7 @@ const STRINGS = {
     c3: 'Your browser opens this site again. If it asks to access your local network, choose Allow.',
     c4: 'When the top of the page says Connected locally, you are ready to install.',
     copyCmd: 'Copy command', cmdCopied: 'Copied',
+    ghLabel: 'View the source on GitHub', ghHint: 'Prefer the command line, or want to read the source first? ', ghHintLink: 'See the install guide on GitHub',
     connectNote: 'Needs Node.js 18 or later. Type node -v in the terminal to see your version, or install it from nodejs.org first. Keep the terminal window open while you use the page. Closing it disconnects.',
 
     benefitsTitle: 'Stop copying folders from tool to tool',
@@ -178,7 +180,7 @@ const STRINGS = {
     q8: 'What if I do not have Node.js', a8: 'Download the LTS version from nodejs.org and install it. Open a new terminal afterwards and run the command again.',
     q9: 'How do I get the newest version', a9: 'Run npx ai-skills-installer@latest ui. That always fetches the newest release.',
     finalTitle: 'Connect your computer and install your first skill',
-    footer: 'MIT license. Skill Installer collects no data.',
+    footer: 'MIT license. Skill Installer collects no data.', footerSource: ' Source: ',
 
     netGithub: 'Cannot reach GitHub. Check your network, or paste a repository address.',
     rateLimit: 'GitHub search is used up for now. Wait a minute, or paste a repository address.',

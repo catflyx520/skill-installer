@@ -22,6 +22,8 @@
   <nav class="nav" data-i18n-label="navLabel">
     <span class="title-3">Skill Installer</span>
     <span class="chip caption-4" id="mode-chip"></span>
+    <!-- Links marked data-repo get their address from app.js. -->
+    <a class="lang nav-link button-sm" id="gh-link" data-repo="" target="_blank" rel="noopener noreferrer" data-i18n-label="ghLabel"><span class="gh-text">GitHub</span></a>
     <button class="lang button-sm" id="lang-btn" type="button" data-i18n-label="switchLang"></button>
   </nav>
 
@@ -50,6 +52,7 @@
           <li data-i18n="c4"></li>
         </ol>
         <p class="caption-2 muted steps-note" data-i18n="connectNote"></p>
+        <p class="caption-2 muted lead"><span data-i18n="ghHint"></span><a class="link" data-repo="#quick-start" target="_blank" rel="noopener noreferrer" data-i18n="ghHintLink"></a></p>
       </div>
 
       <div class="card">
@@ -116,10 +119,13 @@
 
     <section class="section final marketing reveal">
       <h2 class="heading-3" data-i18n="finalTitle"></h2>
-      <a class="btn btn-primary button-md" href="#console" data-i18n="cta"></a>
+      <div class="final-actions">
+        <a class="btn btn-primary button-md" href="#console" data-i18n="cta"></a>
+        <a class="btn btn-ghost button-md" data-repo="" target="_blank" rel="noopener noreferrer" data-i18n="viewOnGithub"></a>
+      </div>
     </section>
   </main>
 
-  <footer class="footer caption-5 muted" data-i18n="footer"></footer>
+  <footer class="footer caption-5 muted"><span data-i18n="footer"></span><span data-i18n="footerSource"></span><a class="link" data-repo="" target="_blank" rel="noopener noreferrer">github.com/catflyx520/skill-installer</a></footer>
 </body>
 </html>
