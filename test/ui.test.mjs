@@ -74,16 +74,17 @@ test('the page and the API need the token', async () => {
 });
 
 test('the hosted site may call the API, other sites may not', async () => {
-  const site = 'https://catflyx520.github.io';
-  const preflight = await fetch(`${origin}/api/add`, { method: 'OPTIONS', headers: { Origin: site } });
-  assert.equal(preflight.status, 204);
-  assert.equal(preflight.headers.get('access-control-allow-origin'), site);
-  assert.equal(preflight.headers.get('access-control-allow-private-network'), 'true');
-  assert.match(preflight.headers.get('access-control-allow-headers'), /x-skill-installer-token/i);
+  for (const site of ['https://catfly.dev', 'https://catflyx520.github.io']) {
+    const preflight = await fetch(`${origin}/api/add`, { method: 'OPTIONS', headers: { Origin: site } });
+    assert.equal(preflight.status, 204);
+    assert.equal(preflight.headers.get('access-control-allow-origin'), site);
+    assert.equal(preflight.headers.get('access-control-allow-private-network'), 'true');
+    assert.match(preflight.headers.get('access-control-allow-headers'), /x-skill-installer-token/i);
 
-  const allowed = await fetch(`${origin}/api/state`, { headers: { ...headers(), Origin: site } });
-  assert.equal(allowed.status, 200);
-  assert.equal(allowed.headers.get('access-control-allow-origin'), site);
+    const allowed = await fetch(`${origin}/api/state`, { headers: { ...headers(), Origin: site } });
+    assert.equal(allowed.status, 200);
+    assert.equal(allowed.headers.get('access-control-allow-origin'), site);
+  }
 
   // Even with the right token: the token is only ever handed to the hosted page.
   for (const other of ['https://evil.example', 'null']) {
@@ -98,7 +99,7 @@ test('the hosted site may call the API, other sites may not', async () => {
 });
 
 test('the command opens the hosted site with the connection details', () => {
-  assert.ok(output.includes(`https://catflyx520.github.io/skill-installer/#connect=${new URL(address).port}.${token}`), output);
+  assert.ok(output.includes(`https://catfly.dev/skill-installer/#connect=${new URL(address).port}.${token}`), output);
 });
 
 test('only known static files are served', async () => {

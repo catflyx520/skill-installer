@@ -1,6 +1,6 @@
 {
   "name": "ai-skills-installer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Install one agent skill or plugin into Claude Code, Codex, Cursor and Gemini CLI at once",
   "keywords": ["agent", "skills", "plugins", "claude-code", "codex", "cursor", "gemini-cli"],
   "homepage": "https://github.com/catflyx520/skill-installer#readme",

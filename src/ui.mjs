@@ -34,7 +34,7 @@ const HEADERS = {
   'Cache-Control': 'no-store',
 };
 // The hosted page that `ui` opens. It and its mirrors may call this server; no other website may.
-const SITE = process.env.SKILL_INSTALLER_SITE || 'https://catflyx520.github.io/skill-installer/';
+const SITE = process.env.SKILL_INSTALLER_SITE || 'https://catfly.dev/skill-installer/';
 const SITES = new Set([new URL(SITE).origin, 'https://catflyx520.github.io', 'https://catfly.dev']);
 const PREFLIGHT = {
   'Access-Control-Allow-Methods': 'GET, POST',

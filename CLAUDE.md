@@ -33,9 +33,9 @@
 - **CLI 输出用英文**（避免 PowerShell 中文乱码）。**README 是英文**，因为它会显示在 GitHub 和 npm 的页面上；这份 CLAUDE.md 用中文。
 - **页面有中英文两套文案**，全部在 `ui/i18n.js` 里，页面右上角切换，选择存在 `localStorage`。`index.html` 里不写任何可见文字，只写 `data-i18n="键"`；`app.js` 里一律用 `t('键')`。加文案时两种语言都要加。服务端和 CLI 返回的英文错误原样显示，不翻译。
 - **页面的所有写操作都 spawn 真实 CLI**（`src/ui.mjs`），不要在服务里重新实现安装逻辑，否则安全规则会被绕开；这样 git 也不会阻塞服务。写操作串行排队，因为都要改清单。
-- **托管网站直连本地服务**：别人打开托管网站，运行 `npx ai-skills-installer ui`，命令打开 `<网站>#connect=<端口>.<令牌>`，页面读到后把请求发到 `http://127.0.0.1:<端口>`。令牌放在 `#` 后面，所以不会发给网站的服务器。页面把它存进 `sessionStorage`（刷新后还连着）并从地址栏去掉。连不上时（浏览器拦截，或终端已关）提示里有“打开本地页面”的按钮。要打开的网站是 `src/ui.mjs` 的 `SITE`，默认 GitHub Pages，因为它总是和 `main` 一致；catfly.dev 是固定版本，等它重新发布后再考虑切换。
+- **托管网站直连本地服务**：别人打开托管网站，运行 `npx ai-skills-installer ui`，命令打开 `<网站>#connect=<端口>.<令牌>`，页面读到后把请求发到 `http://127.0.0.1:<端口>`。令牌放在 `#` 后面，所以不会发给网站的服务器。页面把它存进 `sessionStorage`（刷新后还连着）并从地址栏去掉。连不上时（浏览器拦截，或终端已关）提示里有“打开本地页面”的按钮。要打开的网站是 `src/ui.mjs` 的 `SITE`，从 0.2.1 起默认 `https://catfly.dev/skill-installer/`（用户自己的域名，是用户的决定）。catfly.dev 是固定版本：改了页面之后，要去 Portfolio 仓库（`D:Docsprojects portfolioportfolio`）把 `.github/workflows/publish-site.yml` 里固定的提交号改成新的并推送，那里的页面才会变；那边的发布流程有 `npm audit` 检查，依赖有新漏洞时要先升级才能发布。GitHub Pages 那份仍然自动更新，也仍在允许的来源里。catfly.dev 上的其他应用和它同一个来源，同一个标签页里能读到 `sessionStorage` 里的连接信息；要隔离就给它单独的子域名。
 - **只有托管网站和本地页面能调用 API**（`src/ui.mjs` 的 `SITES`）：带 `Origin` 且不在列表里的请求直接 403，哪怕令牌是对的。预检请求（`OPTIONS`）带不了令牌，所以在令牌检查之前回答，但只回答列表里的来源。这条有测试，不要放宽成 `*`。
-- **托管页面和 CLI 的版本会不一致**：页面一推送就更新，用户的 `npx` 可能还是旧版。改 API 时要让新页面仍能用旧服务。发布顺序是先推页面，再发 npm，否则新 CLI 会打开一个还不认识 `#connect` 的旧页面。
+- **托管页面和 CLI 的版本会不一致**：页面一推送就更新，用户的 `npx` 可能还是旧版。改 API 时要让新页面仍能用旧服务。发布顺序是先推页面，再更新 Portfolio 里固定的提交号让 catfly.dev 发布，最后发 npm，否则新 CLI 会打开一个还没有新功能的旧页面。
 - **页面的安全边界**：只监听 `127.0.0.1`，页面和 API 都要启动时生成的令牌；传给 CLI 的参数不能以 `-` 开头。skill 的内容不可信，`ui/app.js` 只用文本节点渲染，不要改成 `innerHTML`。
 - **GitHub 搜索在浏览器里做**（`ui/app.js` 的 `searchGitHub`），两种模式共用一份代码，所以 CSP 只放行 `https://api.github.com`。不登录的限制是搜索每分钟 10 次、其他接口每小时 60 次。每次搜索发两个请求：“名字 + skill”和“名字 in:name”，都按星标排序，后者只保留仓库名完全一致的。**不要改回默认的最佳匹配排序**：实测搜 `ponytail` 时它把一个 64 星的仿冒仓库排在 18 万星的原版前面，而原版的简介里没有 skill 这个词，只靠第一个请求根本搜不到。另外单独检查官方仓库 `anthropics/skills` 里有没有同名 skill。代码搜索接口必须登录，所以没用。
 - **页面按 AI 分页，每页再分 Skill 和插件**：用户要的是“每个 AI 里有什么”，不是“每个 skill 装在哪”。不是 skill-installer 安装的 skill 由 `src/ui.mjs` 的 `unmanaged()` 列出，只显示，页面上没有任何能改动它们的操作。
@@ -82,7 +82,7 @@ examples/fake-tool.mjs   测试里顶替 claude / codex 命令的假工具（不
 
 ## 下一步（按建议顺序）
 
-1. 已发布到 npm：`ai-skills-installer@0.2.0`（2026-11-24，托管网站直连）。用发布的包实测过：`npx ai-skills-installer@latest ui` 启动后，线上网站在 Chrome 157 和 Edge 157 里能连上本机（无界面模式，用调试接口授予本地网络权限）。没测到的：Chrome 的权限弹窗本身、Safari、Firefox。Claude 桌面应用的内置浏览器会拦住这种连接，页面会显示“打开本地页面”的后备按钮。发布后 npm 要过几分钟才显示新版本（这次约 6 分钟）。再发新版本要先改 `package.json` 的 `version`，然后由用户自己运行 `npm publish`（账号开了两步验证，要输验证码）。新包第一次发布后 npm 会先放一个 `0.0.0-stage` 占位版本，几分钟后才换成真正的版本，这是正常流程。
+1. `package.json` 是 `0.2.1`（默认网站换成 catfly.dev），还没有发布；catfly.dev 上已经是能连接的页面（Portfolio 固定在 `6dbe056`），所以随时可以发。已发布到 npm：`ai-skills-installer@0.2.0`（2026-11-24，托管网站直连，默认打开 GitHub Pages）。用发布的包实测过：`npx ai-skills-installer@latest ui` 启动后，线上网站在 Chrome 157 和 Edge 157 里能连上本机（无界面模式，用调试接口授予本地网络权限）。没测到的：Chrome 的权限弹窗本身、Safari、Firefox。Claude 桌面应用的内置浏览器会拦住这种连接，页面会显示“打开本地页面”的后备按钮。发布后 npm 要过几分钟才显示新版本（这次约 6 分钟）。再发新版本要先改 `package.json` 的 `version`，然后由用户自己运行 `npm publish`（账号开了两步验证，要输验证码）。新包第一次发布后 npm 会先放一个 `0.0.0-stage` 占位版本，几分钟后才换成真正的版本，这是正常流程。
 2. 演示页在 https://catflyx520.github.io/skill-installer/ ，由 `.github/workflows/pages.yml` 在 `ui/` 有改动并推到 `main` 时自动重新部署。代码在 GitHub 的 `skill-installer` 仓库。这个仓库的提交邮箱用的是 GitHub 的 noreply 地址（只设在本仓库的 git 配置里），不要改回去。
 2. `doctor`：检查断链、缺失的 SKILL.md、清单与磁盘不一致（页面里已能看到“已损坏”）。
 3. `sync`：导出/导入清单，换电脑一键还原。
