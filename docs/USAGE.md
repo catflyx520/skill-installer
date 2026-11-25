@@ -166,7 +166,7 @@ src/hub.mjs               central store, fetching sources, linking
 src/commands.mjs          add / list / remove / agents / inspect
 src/plugins.mjs           plugins: calls the plugin commands of claude and codex
 src/ui.mjs                local service behind the web page
-ui/                       the web page and the demo (one copy). i18n.js holds the texts, search.js ranks search results
+ui/                       the web page, also served as the hosted site (one copy). i18n.js holds the texts, search.js ranks search results
 skills/                   the skill-installer skill
 test/                     end to end tests
 ```
